@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @ResponseBody
 @Controller
 public class DemoApplication {
-	main test = new main();
+	
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
 	}
@@ -41,7 +41,7 @@ public class DemoApplication {
 	@PostMapping("/api")
     public String postBody(@RequestBody JSONObject obstacles) {
 
-		
+		main test = new main();
 		String output = test.callAlgo(obstacles);
 
         return output;
@@ -49,7 +49,7 @@ public class DemoApplication {
 	
 	@PostMapping("/checklist")
     public String postBody(@RequestBody String obstacles) {
-		
+		main test = new main();
 		String output = test.turnToNextSide(obstacles);
         return output;
     }

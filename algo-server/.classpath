@@ -5,6 +5,14 @@
 	<classpathentry kind="src" path="demo/src/test/java"/>
 	<classpathentry kind="lib" path="demo/.mvn/wrapper/maven-wrapper.jar"/>
 	<classpathentry kind="lib" path="C:/Users/bbobo/Downloads/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/bbobo/.m2/repository/org/springframework/spring-web/6.0.4/spring-web-6.0.4.jar" sourcepath="C:/Users/bbobo/.m2/repository/org/springframework/spring-web/6.0.4/spring-web-6.0.4-sources.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="org.springframework"/>
+			<attribute name="maven.artifactId" value="spring-web"/>
+			<attribute name="maven.version" value="6.0.4"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="demo/target/classes"/>
-	
 </classpath>

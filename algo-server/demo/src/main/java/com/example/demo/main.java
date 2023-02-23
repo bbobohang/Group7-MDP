@@ -38,7 +38,7 @@ public class main extends JPanel {
 
 	Map<Point, Color> tiles = new HashMap<Point, Color>();
 
-	Node start = new Node(new Point(25, 450), cellWidth, cellHeight);
+	Node start = new Node(new Point(25, 425), cellWidth, cellHeight);
 
 	Node robot = new Node(new Point(25, 450), cellWidth, cellHeight);
 
@@ -46,130 +46,132 @@ public class main extends JPanel {
 	LinkedHashMap<String, Node> goals = new LinkedHashMap<>();
 	Set<Node> open = new HashSet<Node>();
 	Set<Node> closed = new HashSet<Node>();
+	
 	Thread simulator;
 	boolean pathExists = true;
+	/*
 	JLabel timeLabel = new JLabel();
 	long startTime = System.nanoTime();
 	public main() {
-// 		JFrame frame = new JFrame();
-// 		frame.setSize(850, 500);
-// 		frame.setLocationRelativeTo(null);
-// 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-// 		frame.setResizable(false);
+ 		JFrame frame = new JFrame();
+ 		frame.setSize(850, 500);
+ 		frame.setLocationRelativeTo(null);
+ 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+ 		frame.setResizable(false);
 
-// 		ButtonGroup group = new ButtonGroup();
+ 		ButtonGroup group = new ButtonGroup();
 
-// 		JRadioButton startSelect = new JRadioButton("Start");
-// 		JRadioButton obsSelect = new JRadioButton("Add Obstacle");
-
-
-
-// 		obsSelect.setSelected(true);
-
-// 		group.add(startSelect);
-// 		group.add(obsSelect);
+ 		JRadioButton startSelect = new JRadioButton("Start");
+ 		JRadioButton obsSelect = new JRadioButton("Add Obstacle");
 
 
-// 		JButton find = new JButton("Find Path");
-// 		find.addActionListener(event -> {
-// 			findPath();
-// 			repaint();
-// 		});
 
-// 		JButton reset = new JButton("Reset Path");
-// 		reset.addActionListener(event -> {
-// 			resetPath();
-// 		});
+ 		obsSelect.setSelected(true);
 
-// 		SpringLayout layout = new SpringLayout();
-// 		this.setLayout(layout);
-// 		layout.putConstraint(SpringLayout.EAST, startSelect, -250, SpringLayout.EAST, this);
-// 		layout.putConstraint(SpringLayout.NORTH, startSelect, 30, SpringLayout.NORTH, this);
-// 		// this.add(startSelect);
-// 		layout.putConstraint(SpringLayout.EAST, find, -60, SpringLayout.EAST, this);
-// 		layout.putConstraint(SpringLayout.NORTH, find, 120, SpringLayout.NORTH, this);
-// 		this.add(find);
-// 		layout.putConstraint(SpringLayout.EAST, reset, 0, SpringLayout.EAST, find);
-// 		layout.putConstraint(SpringLayout.NORTH, reset, 50, SpringLayout.NORTH, find);
-// 		this.add(reset);
+ 		group.add(startSelect);
+ 		group.add(obsSelect);
+
+
+ 		JButton find = new JButton("Find Path");
+ 		find.addActionListener(event -> {
+ 			findPath();
+ 			repaint();
+ 		});
+
+ 		JButton reset = new JButton("Reset Path");
+ 		reset.addActionListener(event -> {
+ 			resetPath();
+ 		});
+
+ 		SpringLayout layout = new SpringLayout();
+ 		this.setLayout(layout);
+ 		layout.putConstraint(SpringLayout.EAST, startSelect, -250, SpringLayout.EAST, this);
+ 		layout.putConstraint(SpringLayout.NORTH, startSelect, 30, SpringLayout.NORTH, this);
+ 		 this.add(startSelect);
+ 		layout.putConstraint(SpringLayout.EAST, find, -60, SpringLayout.EAST, this);
+ 		layout.putConstraint(SpringLayout.NORTH, find, 120, SpringLayout.NORTH, this);
+ 		this.add(find);
+ 		layout.putConstraint(SpringLayout.EAST, reset, 0, SpringLayout.EAST, find);
+ 		layout.putConstraint(SpringLayout.NORTH, reset, 50, SpringLayout.NORTH, find);
+ 		this.add(reset);
 		
-//         //timeLabel.setAlignmentY(Component.BOTTOM_ALIGNMENT);
-// 		layout.putConstraint(SpringLayout.EAST, timeLabel,0, SpringLayout.EAST, reset);
-// 		layout.putConstraint(SpringLayout.SOUTH, timeLabel, 50, SpringLayout.SOUTH, reset);
-// 		//timeLabel.setHorizontalAlignment(JLabel.LEFT);
-//         timeLabel.setText("Time: 0s");
-//         timeLabel.setFont(new Font("ARIAL", Font.BOLD, 15));
-//         timeLabel.setMaximumSize(new Dimension(100,40));
-//         //layout.putConstraint(SpringLayout.SOUTH, timeLabel, 50, SpringLayout.EAST, find);
-//         this.add(timeLabel);
+         timeLabel.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+ 		layout.putConstraint(SpringLayout.EAST, timeLabel,0, SpringLayout.EAST, reset);
+ 		layout.putConstraint(SpringLayout.SOUTH, timeLabel, 50, SpringLayout.SOUTH, reset);
+ 		timeLabel.setHorizontalAlignment(JLabel.LEFT);
+         timeLabel.setText("Time: 0s");
+         timeLabel.setFont(new Font("ARIAL", Font.BOLD, 15));
+         timeLabel.setMaximumSize(new Dimension(100,40));
+         layout.putConstraint(SpringLayout.SOUTH, timeLabel, 50, SpringLayout.EAST, find);
+         this.add(timeLabel);
 
-// 		this.addMouseListener(new MouseListener() {
-// 			@Override
-// 			public void mousePressed(MouseEvent e) {
-// 				int x = e.getX();
-// 				int y = e.getY();
-// 				System.out.println("X: " + x + ", Y: " + y);
-// 				Node tile = new Node(new Point(cellWidth * ((int) x / cellWidth), cellHeight * ((int) y / cellHeight)),
-// 						cellWidth, cellHeight, Direction.UP);
+ 		this.addMouseListener(new MouseListener() {
+ 			@Override
+ 			public void mousePressed(MouseEvent e) {
+ 				int x = e.getX();
+ 				int y = e.getY();
+ 				System.out.println("X: " + x + ", Y: " + y);
+ 				Node tile = new Node(new Point(cellWidth * ((int) x / cellWidth), cellHeight * ((int) y / cellHeight)),
+ 						cellWidth, cellHeight, Direction.UP);
 
-// 				switch (e.getButton()) {
-// 				case MouseEvent.BUTTON1:
+ 				switch (e.getButton()) {
+ 				case MouseEvent.BUTTON1:
 
-// 					// set boundaries for selection area
-// 					if (x >= 500 || (x <= 50 && y >= 450)) {
-// 						return;
-// 					}
+ 					 set boundaries for selection area
+ 					if (x >= 500 || (x <= 50 && y >= 450)) {
+ 						return;
+ 					}
 
-// //                		if(startSelect.isSelected()) {
-// //                            start = tile;
-// //                            tiles.put(tile.getPoint(), Color.GRAY);
-// //                        }
-// 					else if (obsSelect.isSelected()) {
-// 						addOrChangeObstacleDirection(x, y);
-// 					}
+                 		if(startSelect.isSelected()) {
+                             start = tile;
+                             tiles.put(tile.getPoint(), Color.GRAY);
+                         }
+ 					else if (obsSelect.isSelected()) {
+ 						addOrChangeObstacleDirection(x, y);
+ 					}
 
-// 					break;
-// 				// rc barrier
-// 				case MouseEvent.BUTTON3:
-// 					tiles.put(tile.getPoint(), Color.BLACK);
-// 					closed.add(tile);
-// 					break;
-// 				}
-// 				repaint();
-// 			}
+ 					break;
+ 				 rc barrier
+ 				case MouseEvent.BUTTON3:
+ 					tiles.put(tile.getPoint(), Color.BLACK);
+ 					closed.add(tile);
+ 					break;
+ 				}
+ 				repaint();
+ 			}
 
-// 			@Override
-// 			public void mouseClicked(MouseEvent e) {
+ 			@Override
+ 			public void mouseClicked(MouseEvent e) {
 
-// 			}
+ 			}
 
-// 			@Override
-// 			public void mouseReleased(MouseEvent e) {
+ 			@Override
+ 			public void mouseReleased(MouseEvent e) {
 
-// 			}
+ 			}
 
-// 			@Override
-// 			public void mouseEntered(MouseEvent e) {
+ 			@Override
+ 			public void mouseEntered(MouseEvent e) {
 
-// 			}
+ 			}
 
-// 			@Override
-// 			public void mouseExited(MouseEvent e) {
+ 			@Override
+ 			public void mouseExited(MouseEvent e) {
 
-// 			}
-// 		});
+ 			}
+ 		});
 
-// 		this.setPreferredSize(frame.getSize());
-// 		frame.add(this);
-// 		frame.pack();
+ 		this.setPreferredSize(frame.getSize());
+ 		frame.add(this);
+ 		frame.pack();
 
-// 		for (int i = 0; i < width; i += cellWidth) {
-// 			for (int j = 0; j < height; j += cellHeight) {
-// 				tiles.put(new Point(i, j), Color.WHITE);
-// 			}
-// 		}
+ 		for (int i = 0; i < width; i += cellWidth) {
+ 			for (int j = 0; j < height; j += cellHeight) {
+ 				tiles.put(new Point(i, j), Color.WHITE);
+ 			}
+ 		}
 
-// 		frame.setVisible(true);
+ 		frame.setVisible(true);
 	}
 
 	public void addOrChangeObstacleDirection(int x, int y) {
@@ -192,7 +194,8 @@ public class main extends JPanel {
 		obstacles.put(node.getXYPair(), node);
 
 		repaint();
-	}
+		
+	} */
 
 
 
@@ -223,7 +226,7 @@ public class main extends JPanel {
 		obstacles.clear();
 		goals.clear();
 		simulator.stop();
-		timeLabel.setText("Time: 0s");
+		//timeLabel.setText("Time: 0s");
 		open = new HashSet<Node>();
 		closed = new HashSet<Node>();
 		robot = new Node(new Point(25, 450), cellWidth, cellHeight);
@@ -239,12 +242,12 @@ public class main extends JPanel {
 	
 	public void updateTime() {
         long stopTime = System.nanoTime();
-        long current = (stopTime - startTime) / (1000 * 1000 * 1000);
-        timeLabel.setText("Time: " + current + " s");
+        //long current = (stopTime - startTime) / (1000 * 1000 * 1000);
+        //timeLabel.setText("Time: " + current + " s");
 	}
 	
 	public Node convertJsonToNode(int x, int y, int dir, int id) {
-		Point p = new Point(x * 25, y * 25);
+		Point p = new Point(x * 25, 475 - (y * 25));
 		
 		
 		Node node = new Node(p, cellWidth, cellHeight);
@@ -261,22 +264,28 @@ public class main extends JPanel {
 		if (parentdir == Direction.UP ) {
 			if (currdir == Direction.LEFT) return "FL90";
 			if (currdir == Direction.RIGHT) return "FR90";
-			if (currdir == Direction.DOWN) return "BW--";
+			if (currdir == Direction.DOWN) return "BW01";
 		}
 		if (parentdir == Direction.DOWN) {
-			if (list.get(list.size()-1) == "BW--") {
+			if (list.get(list.size()-1) == "BW01") {
 				if (currdir == Direction.LEFT) return "BL90";
 				if (currdir == Direction.RIGHT) return "BR90";
 			}
 			if (currdir == Direction.LEFT) return "FL90";
 			if (currdir == Direction.RIGHT) return "FR90";
 		}
-		if (parentdir == Direction.LEFT || parentdir == Direction.RIGHT) {
+		if (parentdir == Direction.LEFT ) {
 			if (currdir == Direction.UP) return "FL90";
 			if (currdir == Direction.DOWN) return "FR90";
+			if (currdir == Direction.RIGHT) return "BW01";
+		}
+		if (parentdir == Direction.RIGHT) {
+			if (currdir == Direction.UP) return "FL90";
+			if (currdir == Direction.DOWN) return "FR90";
+			if (currdir == Direction.LEFT) return "BW01";
 		}
 		if (parentdir == Direction.NONE) {
-			return "FW--";
+			return "FW01";
 		}
 		return "WHYCAMEHERE";
 	}
@@ -284,11 +293,11 @@ public class main extends JPanel {
 	public String turnToNextSide(String json) {
 		  JSONObject returnObj = new JSONObject();
 		        JSONArray list = new JSONArray();
-		        list.add("FW--");
-		        list.add("FW--");
+		        list.add("FW01");
+		        list.add("FW01");
 		        list.add("FR90");
-		        list.add("FW--");
-		        list.add("FW--");
+		        list.add("FW01");
+		        list.add("FW01");
 		        list.add("SNAP");
 		        returnObj.put("commands", list);
 		  return returnObj.toJSONString();
@@ -333,12 +342,12 @@ public class main extends JPanel {
 			//basic movement
 			else {
 				switch (node.dir) {
-				case UP: list.add("FW--"); break;
-				case RIGHT: list.add("FW--"); break;
-				case LEFT: list.add("FW--"); break;
+				case UP: list.add("FW01"); break;
+				case RIGHT: list.add("FW01"); break;
+				case LEFT: list.add("FW01"); break;
 				case DOWN: 
-					if (list.get(list.size()-1) == "BW--") list.add("BW--");
-					else list.add("FW--");
+					if (list.get(list.size()-1) == "BW01") list.add("BW01");
+					else list.add("FW01");
 					
 					break;
 				}	
@@ -356,15 +365,15 @@ public class main extends JPanel {
 				}
 			}
 		}
-		list.add("FIN");
+//		list.add("FIN");
 		returnObj.put("commands", list);
 		System.out.println(returnObj);
 		return returnObj.toJSONString();
-	
+	 
 	}
 
 	public Node findPath() {
-		startTime = System.nanoTime();
+		//startTime = System.nanoTime();
 		// have to copy to a new var, cant just use obstacle.values as it is being used
 		// to draw the nodes
 		Collection<Node> nodes = new HashSet<Node>(obstacles.values().size());
@@ -799,12 +808,12 @@ public class main extends JPanel {
 		String outputjson = findPathJson(input);
 		return outputjson;
 		}
-	// public static void main(String[] args) {
-	// 	main simulator = new main();
-	// 	//String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"x\":3,\"y\":15,\"id\":1,\"d\":4},{\"x\":16,\"y\":18,\"id\":2,\"d\":2},{\"x\":14,\"y\":11,\"id\":3,\"d\":4},{\"x\":7,\"y\":6,\"id\":4,\"d\":2},{\"x\":17,\"y\":6,\"id\":5,\"d\":0},{\"x\":8,\"y\":15,\"id\":6,\"d\":6}],\"mode\":\"0\"}}";
-	// 	String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"x\":16,\"y\":18,\"id\":2,\"d\":2},{\"x\":14,\"y\":11,\"id\":3,\"d\":4},{\"x\":7,\"y\":6,\"id\":4,\"d\":2},{\"x\":17,\"y\":6,\"id\":5,\"d\":0},{\"x\":8,\"y\":15,\"id\":6,\"d\":6}],\"mode\":\"0\"}}";
-		
-	// 	String outputjson = simulator.findPathJson(json);
-	// }
+//	 public static void main(String[] args) {
+//	 	main simulator = new main();
+//	 	//String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"x\":3,\"y\":15,\"id\":1,\"d\":4},{\"x\":16,\"y\":18,\"id\":2,\"d\":2},{\"x\":14,\"y\":11,\"id\":3,\"d\":4},{\"x\":7,\"y\":6,\"id\":4,\"d\":2},{\"x\":17,\"y\":6,\"id\":5,\"d\":0},{\"x\":8,\"y\":15,\"id\":6,\"d\":6}],\"mode\":\"0\"}}";
+//	 	String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"x\":16,\"y\":18,\"id\":2,\"d\":2},{\"x\":14,\"y\":11,\"id\":3,\"d\":4},{\"x\":7,\"y\":6,\"id\":4,\"d\":2},{\"x\":17,\"y\":6,\"id\":5,\"d\":0},{\"x\":8,\"y\":15,\"id\":6,\"d\":6}],\"mode\":\"0\"}}";
+//		
+//	 	String outputjson = simulator.findPathJson(json);
+//	 }
 
 }

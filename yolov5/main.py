@@ -24,8 +24,8 @@ class_dict = {'0': '11', '1': '12', '2': '13', '3': '14', '4': '15', '5': '16', 
 direction_dict = {0: 'U', 2: 'R', 4: 'D', 6: 'L'}
 
 # Getting the images from RPI
-model = torch.hub.load('.', 'custom', path='best.pt', source='local')  # local repo
-print("===== Model loaded =====")
+# model = torch.hub.load('.', 'custom', path='best.pt', source='local')  # local repo
+# print("===== Model loaded =====")
 
 # Socket
 host = "192.168.7.7"
@@ -76,18 +76,69 @@ print("Waiting for bluetooth to start...")
 # Global dir to keep the best image for stitching
 # Start capturing of image from server
 cap = cv2.VideoCapture()
-cap.open("http://192.168.7.7:5000/stream.mjpg")
+
 # cap.open("http://192.168.192.10:5000/stream.mjpg")
+
+
+def checklist_capture():
+    cap.open("http://192.168.7.7:5000/stream.mjpg")
+    THRESHOLD = 0.7
+
+    ret, image = cap.read()
+    
+    img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    img_gray = cv2.resize(img_gray, (615, 462))
+
+    # recognition
+    results = model(img_gray)
+    results.render()
+    class_dict = results.names
+
+    res = []
+    boxes = results.xywh[0]
+    """xywh: x,y coordiaante of the center of the bounding box. w,h width height of the bounding box"""
+    print(boxes)
+    for box in boxes:
+        box = box.tolist()
+        print(box)
+        # Image above midpoint, and small => False
+        # if box[1] > 231 and box[3] < 50:
+        #     continue
+        # # Filter by confidence level
+        # elif box[4] > THRESHOLD:
+        #     res.append(box)
+        if box[4] > THRESHOLD:
+            res.append(box)
+
+    if res:
+        biggest_box = res[0]
+        for box in res:
+            if box[2] * box[3] > biggest_box[2] * biggest_box[3]:
+                biggest_box = box
+
+        # Print out the x1, y1, w, h, confidence, and class of predicted object
+        x, y, w, h, conf, cls_num = biggest_box
+        cls = str(int(cls_num))
+        print("class from render: ", cls)
+        x, y, w, h, conf, cls = int(x), int(y), int(w), int(h), round(conf, 2), class_dict.get(int(cls))
+        print("Found: {}, {}, {}, {}, {}, {}".format(x, y, w, h, conf, cls))
+        
+        if(cls != None):
+            print("Savin..")
+            cv2.imwrite(f"./detected_images_checklist/{str(cls)}_conf{str(conf)}_width{w}_height{h}.png",
+                        results.ims[0])
+        return cls
 
 
 # take image, recognize and store it.
 def capture(expected, count_obstacle):
     # time.sleep(5)
     print("Capture function")
+    cap.open("http://192.168.7.7:5000/stream.mjpg")
     THRESHOLD = 0.7
     """Capture the last image from cv2.videocapture()"""
     ret, image = cap.read()
-
+    
     img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     img_gray = cv2.resize(img_gray, (615, 462))
 
@@ -322,39 +373,85 @@ try:
     #     direction = {'F': 'w', 'B': 's', 'L': 'a', 'R': 'r', }
     # count_obstacle = 0
     # while car_path:
+    # if(os.path.exists(f"./detected_images_checklist/") == False):
+    #     os.makedirs(f"./detected_images_checklist/")
     # obstaclesString = s.recv(buffer).decode()
     # obstaclesJson = json.loads(obstaclesString)
     # headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-    req = requests.post('http://localhost:8080/checklist', data="testing")
-    commands = req.json().get('commands')
+    # req = requests.post('http://localhost:8080/api', json=obstaclesJson)
+    # commands = req.json().get('commands')
+    # print(commands)
+
+    # turn = 0
+    
+    # for command in commands:
+    #     print(command)
+    #     # if (command == "FW--"):
+    #     #     for i in range(2):
+    #     #         send_to_stm(command)
+    #     #         stm_movement_reply()
+    #     #         time.sleep(1)
+            
+    #     if "SNAP" in command:
+    #         captured = checklist_capture()
+    #         if captured == "BULLEYE":
+    #             print("Taken BULLEYE")
+    #             continue
+    #         elif captured == None:
+    #             print("Nothing captured")
+    #             continue
+    #         else:
+    #             turn = 1
+    #             break
+    #     else:
+    #         send_to_stm(command)
+    #         stm_movement_reply()
+
+    commands = ['FW--','FR90','BW--','SNAP']
     print(commands)
-    while True: 
-        for command in commands:
-            if command == "SNAP":
-                print(command)
-                time.sleep(10)
-                captured = capture(expected, 1)
-                if captured.get("class") == "BULLEYE":
-                    continue
-                else:
-                    break
-            else:
-                print(command)
-                send_to_stm(command)
-                stm_movement_reply()
-            
+    send_to_stm('FR90')
+    stm_movement_reply()
+    time.sleep(1)
+    # send_to_stm('FW04')
+    # stm_movement_reply()
+    # time.sleep(1)
+    # send_to_stm('FW04')
+    # stm_movement_reply()
+    # time.sleep(1)
+    
+
+    # turn = 0 
+    # while (turn == 0): 
+    #     for command in commands:
+    #         if command == "SNAP":
+    #             print("Taking photo...")
+    #             time.sleep(1)
+    #             captured = checklist_capture()
+    #             if captured == "BULLEYE":
+    #                 print("Taken BULLEYE")
+    #                 continue
+    #             elif captured == None:
+    #                 print("Nothing captured")
+    #                 continue
+    #             else:
+    #                 turn = 1
+    #                 break
+    #         else:
+    #             print(command)
+    #             send_to_stm(command)
+    #             stm_movement_reply()
             
         
-        # while True:
-        #     captured = capture(expected, 1)
-        #     if captured.get("class") == "BULLEYE":
-        #         #move 90 degrees
-        #         continue
-        #     else:
-        #         break
+    #     # while True:
+    #     #     captured = capture(expected, 1)
+    #     #     if captured.get("class") == "BULLEYE":
+    #     #         #move 90 degrees
+    #     #         continue
+    #     #     else:
+    #     #         break
         
-    while True:
-        break
+    # while True:
+    #     break
     #     cur_command = car_path.pop(0)
     #     cur_command = compress(cur_command)
     #     print(f"cur: {cur_command}")
