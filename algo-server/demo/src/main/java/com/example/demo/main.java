@@ -386,6 +386,28 @@ public class main extends JPanel {
 					break;
 				}
 			}
+        }
+
+		list.add("FIN");
+		System.out.println("ORIGINAL" + list);
+		for (int i =0; i < list.size(); i++) {
+			if (list.get(i) == "FW" || list.get(i) == "BW") {
+				if (list.get(i+1) == "FR90" || list.get(i+1) == "FL90") {
+					String val = list.get(i) == "FW" ? "FW01" : "BW01";
+					// if after turn is not FW then remove after that
+					if (list.get(i+2).toString().contains("SNAP") ) {
+						if (list.get(i+3) == "FW") {
+							list.remove(i+3);
+						}
+					}
+					else {
+						list.remove(i+2);	
+					}
+					//System.out.println("Removed: " + list.get(i));
+					
+					//list.remove(i);	
+				}
+			}
 		}
 //		list.add("FIN");
 		int count = 0;

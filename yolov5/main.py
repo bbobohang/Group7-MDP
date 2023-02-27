@@ -78,6 +78,56 @@ print("Waiting for bluetooth to start...")
 cap = cv2.VideoCapture()
 # cap.open("http://192.168.192.10:5000/stream.mjpg")
 
+def checklist_capture():
+    cap.open("http://192.168.7.7:5000/stream.mjpg")
+    THRESHOLD = 0.7
+
+    ret, image = cap.read()
+    
+    img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    img_gray = cv2.resize(img_gray, (640, 640))
+
+    # recognition
+    results = model(img_gray)
+    results.render()
+    class_dict = results.names
+
+    res = []
+    boxes = results.xywh[0]
+    """xywh: x,y coordiaante of the center of the bounding box. w,h width height of the bounding box"""
+    print(boxes)
+    for box in boxes:
+        box = box.tolist()
+        print(box)
+        # Image above midpoint, and small => False
+        # if box[1] > 231 and box[3] < 50:
+        #     continue
+        # # Filter by confidence level
+        # elif box[4] > THRESHOLD:
+        #     res.append(box)
+        if box[4] > THRESHOLD:
+            res.append(box)
+
+    if res:
+        biggest_box = res[0]
+        for box in res:
+            if box[2] * box[3] > biggest_box[2] * biggest_box[3]:
+                biggest_box = box
+
+        # Print out the x1, y1, w, h, confidence, and class of predicted object
+        x, y, w, h, conf, cls_num = biggest_box
+        cls = str(int(cls_num))
+        print("class from render: ", cls)
+        x, y, w, h, conf, cls = int(x), int(y), int(w), int(h), round(conf, 2), class_dict.get(int(cls))
+        print("Found: {}, {}, {}, {}, {}, {}".format(x, y, w, h, conf, cls))
+        
+        if(cls != None):
+            print("Savin..")
+            cv2.imwrite(f"./detected_images_checklist/{str(cls)}_conf{str(conf)}_width{w}_height{h}.png",
+                        results.ims[0])
+        return cls
+
+
 # take image, recognize and store it.
 def capture(expected, count_obstacle):
     # time.sleep(5)
@@ -119,6 +169,8 @@ def capture(expected, count_obstacle):
         #     res.append(box)
         if box[4] > THRESHOLD:
             res.append(box)
+        else: 
+            return None
     reply = {}
     if res:
         # """If there are multiple objects detected, return the biggest bounding box"""
@@ -329,26 +381,28 @@ try:
     # while car_path:
     # if(os.path.exists(f"./detected_images_checklist/") == False):
     #     os.makedirs(f"./detected_images_checklist/")
-    obstaclesString = s.recv(buffer).decode()
-    print("string from bt:" + obstaclesString)
-    obstaclesJson = json.loads(obstaclesString)
-    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-    req = requests.post('http://localhost:8080/api', json=obstaclesJson)
-    commands = req.json().get('commands')
-    print(commands)
-
+    # obstaclesString = s.recv(buffer).decode()
+    # print("string from bt:" + obstaclesString)
+    # obstaclesJson = json.loads(obstaclesString)
+    # headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    # req = requests.post('http://localhost:8080/api', json=obstaclesJson)
+    # commands = req.json().get('commands')
+    # print(commands)
+    commands = ["FW03","FR90","FW03","SNAP1","FW04","SNAP2","FW02","FL90","FW01","SNAP3","FW06","FL90","SNAP4","FW02","SNAP5","FW03","FR90","FR90","SNAP6","FIN"]
+    
     for command in commands:
-        time.sleep(2)
+        
         print(command)
-            
+        test = input("Next?")
         if "SNAP" in command:
-            time.sleep(2)
-            captured = capture(expected,1)
-            if captured == None:
-                print("Nothing captured")
-        elif command == "FR90":
-            send_to_stm(command)
-            stm_movement_reply()
+            # time.sleep(2)
+            # captured = capture(expected,1)
+            # if captured == None:
+            #     print("Nothing captured")
+            # else:
+            #     print("Found this: " + captured.get("class"))
+            print("taking photo")
+        elif command == "FIN":
             print("ending")
             break
         else:
