@@ -7,8 +7,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.springframework.boot.jackson.JsonObjectDeserializer;
 
-import src.Direction;
-import src.Node;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -413,22 +411,14 @@ public class main extends JPanel {
 		return returnObj;
 	}
 	@SuppressWarnings("unchecked")
-	public String findPathJson(String json) {
-		 Object obj=JSONValue.parse(json);  
-		 JSONObject jsonObject = (JSONObject) obj;  
-		 System.out.println(jsonObject.get("cat"));
-		 System.out.println(jsonObject.get("value"));
-		 JSONObject value = (JSONObject) jsonObject.get("value");
-		 System.out.println(value.get("mode"));
-		 
-		 JSONArray obstaclesArr = (JSONArray) value.get("obstacles");
-         Iterator<JSONObject> iterator = obstaclesArr.iterator();
-         while (iterator.hasNext()) {
-        	 Node newNode = convertJsonToNode(iterator.next());
-        	 obstacles.put(newNode.getXYPair(), newNode);
-         }
-         Node goal = findPath();
-         Node current = goal;
+	public String findPathJson(JSONObject jsonObject) {
+		ArrayList<LinkedHashMap<String, String>> arrs = (ArrayList) jsonObject.get("obstacles");
+		for (LinkedHashMap obj : arrs) {
+        	Node newNode = convertJsonToNode((int) obj.get("x"), (int) obj.get("y"), (int) obj.get("d"), (int) obj.get("id"));
+        	obstacles.put(newNode.getXYPair(), newNode);
+		}
+        Node goal = findPath();
+        Node current = goal;
 		List<Node> pathNodes = new ArrayList();
 		while (!current.equals(start)) {
 				pathNodes.add(0, current);
