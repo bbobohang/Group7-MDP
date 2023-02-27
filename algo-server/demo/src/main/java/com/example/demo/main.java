@@ -339,6 +339,18 @@ public class main extends JPanel {
         	currX = pathNodes.get(i).getPoint().x;
 			currY = pathNodes.get(i).getPoint().y;
 			
+			//check if reached a obstacle then do action
+			for (Node n : obstacles.values()) {
+				//System.out.println("node XY: " + node.getXYPair() + ", n XY: " + n.getActualGoal().getXYPair());
+				if ( pathNodes.get(i).getXYPair().equals(n.getActualGoal().getXYPair()) &&
+						pathNodes.get(i).getDirection() == n.getActualGoal().getDirection()) {
+					list.add("SNAP" + counter);
+					counter++;
+					//n.setVisited(true);
+					break;
+				}
+			}
+			
 			if (i != pathNodes.size()-1 && pathNodes.get(i).getDirection() != pathNodes.get(i+1).getDirection() ) {
 				//System.out.println("NODE PARENT DIR: " + node.getParent().getDirection() + ", NODE DIR: " + node.getDirection());
 				String turn = "";
@@ -368,29 +380,25 @@ public class main extends JPanel {
 				}	
 			}
 			
-			//check if reached a obstacle then do action
-			for (Node n : obstacles.values()) {
-				//System.out.println("node XY: " + node.getXYPair() + ", n XY: " + n.getActualGoal().getXYPair());
-				if ( pathNodes.get(i).getXYPair().equals(n.getActualGoal().getXYPair()) &&
-						pathNodes.get(i).getDirection() == n.getActualGoal().getDirection()) {
-					list.add("SNAP" + counter);
-					counter++;
-					//n.setVisited(true);
-					break;
-				}
-			}
+			
         }
 
 		list.add("FIN");
 		System.out.println("ORIGINAL" + list);
 		for (int i =0; i < list.size(); i++) {
+			if (list.get(i).toString().contains("SNAP")) {
+				if (list.get(i+1) == "FR90" || list.get(i+1) == "FL90") {
+					list.add(i+1, "BW01");
+				}
+				//add if turn is BR90/FL90 == negative do forward
+			}
 			if (list.get(i) == "FW" || list.get(i) == "BW") {
 				if (list.get(i+1) == "FR90" || list.get(i+1) == "FL90") {
 					String val = list.get(i) == "FW" ? "FW01" : "BW01";
 					// if after turn is not FW then remove after that
 					if (list.get(i+2).toString().contains("SNAP") ) {
 						if (list.get(i+3) == "FW") {
-							list.remove(i+3);
+							//list.remove(i+3);
 						}
 					}
 					else {
@@ -398,7 +406,7 @@ public class main extends JPanel {
 					}
 					//System.out.println("Removed: " + list.get(i));
 					
-					list.remove(i);	
+					//list.remove(i);	
 				}
 			}
 		}
