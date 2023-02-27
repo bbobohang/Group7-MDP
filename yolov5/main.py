@@ -169,10 +169,10 @@ def capture(expected, count_obstacle):
         # # Filter by confidence level
         # elif box[4] > THRESHOLD:
         #     res.append(box)
-        if box[4] > THRESHOLD:
-            res.append(box)
+        # if box[4] > THRESHOLD:
+        res.append(box)
     reply = {}
-    if res:
+    if len(res) > 0:
         # """If there are multiple objects detected, return the biggest bounding box"""
         # biggest_box, mid = res[0], abs(int(res[0][0] - 308))
         # for box in res:
@@ -189,9 +189,9 @@ def capture(expected, count_obstacle):
         # Print out the x1, y1, w, h, confidence, and class of predicted object
         x, y, w, h, conf, cls_num = biggest_box
         cls = str(int(cls_num))
-        print("class from render: ", cls)
+        # print("class from render: ", cls)
         x, y, w, h, conf, cls = int(x), int(y), int(w), int(h), round(conf, 2), class_dict.get(int(cls))
-        print("Found: {}, {}, {}, {}, {}, {}".format(x, y, w, h, conf, cls))
+        # print("Found: {}, {}, {}, {}, {}, {}".format(x, y, w, h, conf, cls))
         
         #Send image capture to Bluetooth
         msg_img = "AN|" + "Detected Image: " + cls
@@ -376,30 +376,34 @@ try:
     # while car_path:
     # if(os.path.exists(f"./detected_images_checklist/") == False):
     #     os.makedirs(f"./detected_images_checklist/")
-    obstaclesString = s.recv(buffer).decode()
-    print("string from bt:" + obstaclesString)
-    obstaclesJson = json.loads(obstaclesString)
-    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-    req = requests.post('http://localhost:8080/api', json=obstaclesJson)
-    commands = req.json().get('commands')
-    print(commands)
+    # obstaclesString = s.recv(buffer).decode()
+    # print("string from bt:" + obstaclesString)
+    # obstaclesJson = json.loads(obstaclesString)
+    # headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    # req = requests.post('http://localhost:8080/api', json=obstaclesJson)
+    # commands = req.json().get('commands')
+    # print(commands)
 
-    
+    commands = ["FW05","FR90","FW13","SNAP1","BW01","FL90","FW03","FL90","BW01","SNAP2","FW07","FL90","FW03","FR90","FW01","SNAP3","FIN"]
     for command in commands:
-        time.sleep(2)
         print(command)
-            
+        text = input("Next?")
         if "SNAP" in command:
-            time.sleep(2)
-            # captured = capture(expected,1)
-            # if captured == "BULLEYE":
-            #     print("Taken BULLEYE")
-            #     continue
-            # elif captured == None:
-            #     print("Nothing captured")
-            # else:
-            #     print("Found this: " + captured.get("class"))
-            print("taking photo")
+            # time.sleep(2)
+            captured = capture(expected,1)
+            if captured == None:
+                print("Nothing captured")
+
+                #Move forward 1 grid
+                send_to_stm('FW01')
+                stm_movement_reply()
+                captured = capture(expected,1)
+                send_to_stm('BW01')
+                stm_movement_reply()
+                if captured == None:
+                    print("Gone obstacles")
+            else:
+                print("Found this: " + captured.get("class"))
         elif command == "FIN":
             print("ending")
             break
