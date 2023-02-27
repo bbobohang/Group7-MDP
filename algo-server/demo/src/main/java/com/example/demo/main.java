@@ -7,6 +7,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.springframework.boot.jackson.JsonObjectDeserializer;
 
+import src.Direction;
+import src.Node;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -302,31 +305,28 @@ public class main extends JPanel {
 		        returnObj.put("commands", list);
 		  return returnObj.toJSONString();
 		 }
-
-	public String findPathJson(JSONObject jsonObject) {
-		 //Object obj=JSONValue.parse(json);  
-		 //JSONObject jsonObject = (JSONObject) obj;  
-		System.out.println(jsonObject.get("cat"));
-		System.out.println(jsonObject.get("value"));
-
-		System.out.println(jsonObject.get("obstacles"));
-		System.out.println(jsonObject.get("mode"));
-
-		ArrayList<LinkedHashMap<String, String>> arrs = (ArrayList) jsonObject.get("obstacles");
-		for (LinkedHashMap obj : arrs) {
-        	Node newNode = convertJsonToNode((int) obj.get("x"), (int) obj.get("y"), (int) obj.get("d"), (int) obj.get("id"));
-        	obstacles.put(newNode.getXYPair(), newNode);
+	
+	public Node convertJsonToNode(JSONObject jsonNode) {
+		Long x = (Long) jsonNode.get("x");
+		Long y = (Long) jsonNode.get("y");
+		Long dir = (Long) jsonNode.get("d");
+		Point p = new Point(x.intValue() * 25, 475 - (y.intValue() * 25));
+		
+		
+		Node node = new Node(p, cellWidth, cellHeight);
+		switch (dir.intValue()) {
+			case 0: node.dir = Direction.UP; break;
+			case 2: node.dir = Direction.RIGHT; break;
+			case 4: node.dir = Direction.DOWN; break;
+			case 6: node.dir = Direction.LEFT; break;
+			default: node.dir = Direction.UP; break;
 		}
-        Node goal = findPath();
-        Node current = goal;
-		List<Node> pathNodes = new ArrayList();
-		while (!current.equals(start)) {
-				pathNodes.add(0, current);
-				current = current.getParent();
-		}
+		return node;
+	}
+	
+	public JSONObject getJsonPath(List<Node> pathNodes) {
 		JSONObject returnObj = new JSONObject();
-		//returnObj.put("data", "mkyong.com");
-        //obj.put("age", 100);
+
 
         JSONArray list = new JSONArray();
         int counter = 1;
@@ -334,43 +334,33 @@ public class main extends JPanel {
         int currY = -100;
         int prevX = -100;
         int prevY = -100;
-  
+        for (int i =0; i< pathNodes.size(); i++) {
+        	
 
-		for (Node node : pathNodes) {
-			   if (prevX == -100 ) {
-				    prevX = node.getPoint().x;
-				    prevY = node.getPoint().y;
-				   }
-				   else {
-				    prevX = currX;
-				    prevY = currY;
-				   }
-				   currX = node.getPoint().x;
-				   currY = node.getPoint().y;
-
-		
-			// handle turn commands
 			
-			if (node.getParent().getDirection() != node.getDirection()) {
+        	currX = pathNodes.get(i).getPoint().x;
+			currY = pathNodes.get(i).getPoint().y;
+			
+			if (i != pathNodes.size()-1 && pathNodes.get(i).getDirection() != pathNodes.get(i+1).getDirection() ) {
 				//System.out.println("NODE PARENT DIR: " + node.getParent().getDirection() + ", NODE DIR: " + node.getDirection());
 				String turn = "";
-				turn = changeDirection(node.getParent().getDirection(), node.getDirection(), list);
+				turn = changeDirection(pathNodes.get(i).getDirection(),pathNodes.get(i+1).getDirection(), list);
 				list.add(turn);
 			}
 			//basic movement
 			else {
-				switch (node.dir) {
-				case UP: list.add("FW01"); break;
-				case RIGHT: list.add("FW01"); break;
+				switch (pathNodes.get(i).getDirection()) {
+				
+				case UP: list.add("FW"); break;
+				case RIGHT: list.add("FW"); break;
 				case LEFT: 
-					if (currX > prevX) list.add("BW01");
-					else list.add("FW01"); 
+					if (currX > pathNodes.get(i-1).getPoint().x) list.add("BW");
+					else list.add("FW"); 
 					break;
 				case DOWN: 
-					if (currY < prevY) list.add("BW01");
-					else if (list.get(list.size()-1) == "BW01") list.add("BW01");
-					else list.add("FW01");
-					
+					if (currY < pathNodes.get(i-1).getPoint().y) list.add("BW");
+					else if (list.get(list.size()- 1) == "BW") list.add("BW");
+					else list.add("FW");
 					break;
 				}	
 			}
@@ -378,51 +368,75 @@ public class main extends JPanel {
 			//check if reached a obstacle then do action
 			for (Node n : obstacles.values()) {
 				//System.out.println("node XY: " + node.getXYPair() + ", n XY: " + n.getActualGoal().getXYPair());
-				if (node.getXYPair().equals(n.getActualGoal().getXYPair()) &&
-						node.getDirection() == n.getActualGoal().getDirection()) {
+				if ( pathNodes.get(i).getXYPair().equals(n.getActualGoal().getXYPair()) &&
+						pathNodes.get(i).getDirection() == n.getActualGoal().getDirection()) {
 					list.add("SNAP" + counter);
 					counter++;
 					//n.setVisited(true);
 					break;
 				}
 			}
+        }
+
+		list.add("FIN");
+		System.out.println("ORIGINAL" + list);
+		for (int i =0; i < list.size(); i++) {
+			if (list.get(i) == "FW" || list.get(i) == "BW") {
+				if (list.get(i+1) == "FR90" || list.get(i+1) == "FL90") {
+					String val = list.get(i) == "FW" ? "FW01" : "BW01";
+					list.remove(i+2);
+					list.remove(i);	
+				}
+			}
 		}
-//		list.add("FIN");
-		int count = 0;
-		int startindex = 0;
-		int endindex = 0;
-		  for (int i =0; i < list.size(); i++) {
-			   if (list.get(i) == "FW01" || list.get(i) == "BW01") {
-			    if (list.get(i+1) == "FR90" || list.get(i+1) == "FL90") {
-			     list.remove(i);
-			    }
-			   }
+		System.out.println("EDIT 1" + list);
+		int noTracker = 0;
+		int bwOrFw = 0;
+		JSONArray list2 = new JSONArray();
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i) == "FW" || list.get(i) == "BW") {
+				bwOrFw = list.get(i) == "FW" ? 1: 2;
+				noTracker++;
+				
+			}
+			else {
+				if (bwOrFw == 1) list2.add(noTracker < 10 ? "FW0" + noTracker : "FW" + noTracker);
+				else if (bwOrFw == 2) list2.add(noTracker < 10 ? "BW0" + noTracker : "BW" + noTracker);
+				list2.add(list.get(i));
+				noTracker = 0;
+				bwOrFw = 0;
+			}
+			//endindex++;
 		}
-		  int noTracker = 1;
-		  int bwOrFw = 0;
-		  JSONArray list2 = new JSONArray();
-		  for (int i = 0; i < list.size(); i++) {
-		   if (list.get(i) == "FW01" || list.get(i) == "BW01") {
-		    if (list.get(i) == "FW01") bwOrFw = 1;
-		    if (list.get(i) == "BW01") bwOrFw = 2;
-		    noTracker++;
-		    
-		   }
-		   else {
-		    if (bwOrFw == 1) list2.add(noTracker < 10 ? "FW0" + noTracker : "FW" + noTracker);
-		    else if (bwOrFw == 2) list2.add(noTracker < 10 ? "BW0" + noTracker : "BW" + noTracker);
-		    list2.add(list.get(i));
-		    noTracker = 0;
-		    bwOrFw = 0;
-		   }
-		   //endindex++;
-		  }
 		returnObj.put("commands", list2);
 		System.out.println(returnObj);
-		return returnObj.toJSONString();
-	 
+		return returnObj;
 	}
-
+	@SuppressWarnings("unchecked")
+	public String findPathJson(String json) {
+		 Object obj=JSONValue.parse(json);  
+		 JSONObject jsonObject = (JSONObject) obj;  
+		 System.out.println(jsonObject.get("cat"));
+		 System.out.println(jsonObject.get("value"));
+		 JSONObject value = (JSONObject) jsonObject.get("value");
+		 System.out.println(value.get("mode"));
+		 
+		 JSONArray obstaclesArr = (JSONArray) value.get("obstacles");
+         Iterator<JSONObject> iterator = obstaclesArr.iterator();
+         while (iterator.hasNext()) {
+        	 Node newNode = convertJsonToNode(iterator.next());
+        	 obstacles.put(newNode.getXYPair(), newNode);
+         }
+         Node goal = findPath();
+         Node current = goal;
+		List<Node> pathNodes = new ArrayList();
+		while (!current.equals(start)) {
+				pathNodes.add(0, current);
+				current = current.getParent();
+		}
+		JSONObject returnObj = getJsonPath(pathNodes);
+		return returnObj.toJSONString();
+	}
 	public Node findPath() {
 		//startTime = System.nanoTime();
 		// have to copy to a new var, cant just use obstacle.values as it is being used
