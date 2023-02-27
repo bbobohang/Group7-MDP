@@ -374,8 +374,8 @@ try:
     #     direction = {'F': 'w', 'B': 's', 'L': 'a', 'R': 'r', }
     # count_obstacle = 0
     # while car_path:
-    if(os.path.exists(f"./detected_images_checklist/") == False):
-        os.makedirs(f"./detected_images_checklist/")
+    # if(os.path.exists(f"./detected_images_checklist/") == False):
+    #     os.makedirs(f"./detected_images_checklist/")
     obstaclesString = s.recv(buffer).decode()
     print("string from bt:" + obstaclesString)
     obstaclesJson = json.loads(obstaclesString)
@@ -384,51 +384,30 @@ try:
     commands = req.json().get('commands')
     print(commands)
 
-    turn = 0
     
     for command in commands:
-        time.sleep(5)
+        time.sleep(2)
         print(command)
             
-        if command == "SNAP1":
-            time.sleep(3)
-            captured = checklist_capture()
-            if captured == "BULLEYE":
-                print("Taken BULLEYE")
-                continue
-            elif captured == None:
-                print("Nothing captured")
-                continue
-            else:
-                turn = 1
-                break
+        if "SNAP" in command:
+            time.sleep(2)
+            # captured = capture(expected,1)
+            # if captured == "BULLEYE":
+            #     print("Taken BULLEYE")
+            #     continue
+            # elif captured == None:
+            #     print("Nothing captured")
+            # else:
+            #     print("Found this: " + captured.get("class"))
+            print("taking photo")
+        elif command == "FIN":
+            print("ending")
+            break
         else:
             send_to_stm(command)
             stm_movement_reply()
 
-    commands = ['FW--','FR--','BW--','SNAP']
-    print(commands)
-
-    turn = 0 
-    while (turn == 0): 
-        for command in commands:
-            if command == "SNAP":
-                print("Taking photo...")
-                time.sleep(1)
-                captured = checklist_capture()
-                if captured == "BULLEYE":
-                    print("Taken BULLEYE")
-                    continue
-                elif captured == None:
-                    print("Nothing captured")
-                    continue
-                else:
-                    turn = 1
-                    break
-            else:
-                print(command)
-                send_to_stm(command)
-                stm_movement_reply()
+    
     # send_to_stm("FL90")
     # stm_movement_reply()        
         

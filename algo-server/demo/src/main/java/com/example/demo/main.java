@@ -38,7 +38,7 @@ public class main extends JPanel {
 
 	Map<Point, Color> tiles = new HashMap<Point, Color>();
 
-	Node start = new Node(new Point(25, 425), cellWidth, cellHeight, Direction.UP);
+	Node start = new Node(new Point(25, 450), cellWidth, cellHeight, Direction.UP);
 
 	Node robot = new Node(new Point(25, 450), cellWidth, cellHeight, Direction.UP);
 

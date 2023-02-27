@@ -185,19 +185,19 @@ public class Node implements Cloneable {
     		//System.out.println("Current Points = " + actualGoal.getPoint().x + ", " + actualGoal.getPoint().y);
     		switch (this.dir) {
     		case LEFT:
-    			actualGoal.getPoint().x -= (2 * cellWidth);
+    			actualGoal.getPoint().x -= (3 * cellWidth);
     			actualGoal.dir = Direction.UP;
     			break;
     		case RIGHT:
-    			actualGoal.getPoint().x += (2 * cellWidth);
+    			actualGoal.getPoint().x += (3 * cellWidth);
     			actualGoal.dir = Direction.DOWN;
     			break;
     		case UP:
-    			actualGoal.getPoint().y -= (2 * cellWidth);
+    			actualGoal.getPoint().y -= (3 * cellWidth);
     			actualGoal.dir = Direction.RIGHT;
     			break;
     		case DOWN:
-    			actualGoal.getPoint().y += (2 * cellWidth);
+    			actualGoal.getPoint().y += (3 * cellWidth);
     			actualGoal.dir = Direction.LEFT;
     			break;
     		}
