@@ -61,11 +61,11 @@ public class Node implements Cloneable {
             Direction currentDir = getDirectionOfTwoNodes(this.parent, this);
             Direction futureDir = getDirectionOfTwoNodes(this, node);
             
-            if (currentDir != futureDir) additionalWeight += 100;
+            if (this.dir != node.dir) additionalWeight += 100;
             //System.out.println("Additional Weight" + additionalWeight);
             if(x > y)
-                return 28*y + 10*(x - y);
-            return 28*x + 10*(y - x);       
+                return 28*y + 10*(x - y) + additionalWeight;
+            return 28*x + 10*(y - x) + additionalWeight;       
         }
         
         public List<Node> getAdjacentNodes(Set<Node> openNodes) {

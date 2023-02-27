@@ -24,8 +24,8 @@ class_dict = {'0': '11', '1': '12', '2': '13', '3': '14', '4': '15', '5': '16', 
 direction_dict = {0: 'U', 2: 'R', 4: 'D', 6: 'L'}
 
 # Getting the images from RPI
-# model = torch.hub.load('.', 'custom', path='best.pt', source='local')  # local repo
-# print("===== Model loaded =====")
+model = torch.hub.load('.', 'custom', path='best.pt', source='local')  # local repo
+print("===== Model loaded =====")
 
 # Socket
 host = "192.168.7.7"
@@ -310,6 +310,7 @@ def compress(input):
 def send_to_stm(command):
     res = "STM|" + command
     s.send(res.encode())
+    time.sleep(3)
     # msg = s.recv(buffer).decode()
     return
 
@@ -373,83 +374,72 @@ try:
     #     direction = {'F': 'w', 'B': 's', 'L': 'a', 'R': 'r', }
     # count_obstacle = 0
     # while car_path:
-    # if(os.path.exists(f"./detected_images_checklist/") == False):
-    #     os.makedirs(f"./detected_images_checklist/")
-    # obstaclesString = s.recv(buffer).decode()
-    # obstaclesJson = json.loads(obstaclesString)
-    # headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-    # req = requests.post('http://localhost:8080/api', json=obstaclesJson)
-    # commands = req.json().get('commands')
-    # print(commands)
-
-    # turn = 0
-    
-    # for command in commands:
-    #     print(command)
-    #     # if (command == "FW--"):
-    #     #     for i in range(2):
-    #     #         send_to_stm(command)
-    #     #         stm_movement_reply()
-    #     #         time.sleep(1)
-            
-    #     if "SNAP" in command:
-    #         captured = checklist_capture()
-    #         if captured == "BULLEYE":
-    #             print("Taken BULLEYE")
-    #             continue
-    #         elif captured == None:
-    #             print("Nothing captured")
-    #             continue
-    #         else:
-    #             turn = 1
-    #             break
-    #     else:
-    #         send_to_stm(command)
-    #         stm_movement_reply()
-
-    commands = ['FW--','FR90','BW--','SNAP']
+    if(os.path.exists(f"./detected_images_checklist/") == False):
+        os.makedirs(f"./detected_images_checklist/")
+    obstaclesString = s.recv(buffer).decode()
+    print("string from bt:" + obstaclesString)
+    obstaclesJson = json.loads(obstaclesString)
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    req = requests.post('http://localhost:8080/api', json=obstaclesJson)
+    commands = req.json().get('commands')
     print(commands)
-    send_to_stm('FR90')
-    stm_movement_reply()
-    time.sleep(1)
-    # send_to_stm('FW04')
-    # stm_movement_reply()
-    # time.sleep(1)
-    # send_to_stm('FW04')
-    # stm_movement_reply()
-    # time.sleep(1)
-    
 
-    # turn = 0 
-    # while (turn == 0): 
-    #     for command in commands:
-    #         if command == "SNAP":
-    #             print("Taking photo...")
-    #             time.sleep(1)
-    #             captured = checklist_capture()
-    #             if captured == "BULLEYE":
-    #                 print("Taken BULLEYE")
-    #                 continue
-    #             elif captured == None:
-    #                 print("Nothing captured")
-    #                 continue
-    #             else:
-    #                 turn = 1
-    #                 break
-    #         else:
-    #             print(command)
-    #             send_to_stm(command)
-    #             stm_movement_reply()
+    turn = 0
+    
+    for command in commands:
+        time.sleep(5)
+        print(command)
             
+        if command == "SNAP1":
+            time.sleep(3)
+            captured = checklist_capture()
+            if captured == "BULLEYE":
+                print("Taken BULLEYE")
+                continue
+            elif captured == None:
+                print("Nothing captured")
+                continue
+            else:
+                turn = 1
+                break
+        else:
+            send_to_stm(command)
+            stm_movement_reply()
+
+    commands = ['FW--','FR--','BW--','SNAP']
+    print(commands)
+
+    turn = 0 
+    while (turn == 0): 
+        for command in commands:
+            if command == "SNAP":
+                print("Taking photo...")
+                time.sleep(1)
+                captured = checklist_capture()
+                if captured == "BULLEYE":
+                    print("Taken BULLEYE")
+                    continue
+                elif captured == None:
+                    print("Nothing captured")
+                    continue
+                else:
+                    turn = 1
+                    break
+            else:
+                print(command)
+                send_to_stm(command)
+                stm_movement_reply()
+    # send_to_stm("FL90")
+    # stm_movement_reply()        
         
-    #     # while True:
-    #     #     captured = capture(expected, 1)
-    #     #     if captured.get("class") == "BULLEYE":
-    #     #         #move 90 degrees
-    #     #         continue
-    #     #     else:
-    #     #         break
-        
+        # while True:
+        #     captured = capture(expected, 1)
+        #     if captured.get("class") == "BULLEYE":
+        #         #move 90 degrees
+        #         continue
+        #     else:
+        #         break
+  
     # while True:
     #     break
     #     cur_command = car_path.pop(0)

@@ -38,16 +38,16 @@ public class main extends JPanel {
 
 	Map<Point, Color> tiles = new HashMap<Point, Color>();
 
-	Node start = new Node(new Point(25, 425), cellWidth, cellHeight);
+	Node start = new Node(new Point(25, 425), cellWidth, cellHeight, Direction.UP);
 
-	Node robot = new Node(new Point(25, 450), cellWidth, cellHeight);
+	Node robot = new Node(new Point(25, 450), cellWidth, cellHeight, Direction.UP);
 
 	LinkedHashMap<String, Node> obstacles = new LinkedHashMap<>();
 	LinkedHashMap<String, Node> goals = new LinkedHashMap<>();
 	Set<Node> open = new HashSet<Node>();
 	Set<Node> closed = new HashSet<Node>();
 	
-	Thread simulator;
+	Thread simulator = null;
 	boolean pathExists = true;
 	/*
 	JLabel timeLabel = new JLabel();
@@ -225,7 +225,7 @@ public class main extends JPanel {
 		//System.out.println("resetted");
 		obstacles.clear();
 		goals.clear();
-		simulator.stop();
+		if (simulator != null) simulator.stop();
 		//timeLabel.setText("Time: 0s");
 		open = new HashSet<Node>();
 		closed = new HashSet<Node>();
@@ -330,7 +330,25 @@ public class main extends JPanel {
 
         JSONArray list = new JSONArray();
         int counter = 1;
+        int currX = -100;
+        int currY = -100;
+        int prevX = -100;
+        int prevY = -100;
+  
+
 		for (Node node : pathNodes) {
+			   if (prevX == -100 ) {
+				    prevX = node.getPoint().x;
+				    prevY = node.getPoint().y;
+				   }
+				   else {
+				    prevX = currX;
+				    prevY = currY;
+				   }
+				   currX = node.getPoint().x;
+				   currY = node.getPoint().y;
+
+		
 			// handle turn commands
 			
 			if (node.getParent().getDirection() != node.getDirection()) {
@@ -344,9 +362,13 @@ public class main extends JPanel {
 				switch (node.dir) {
 				case UP: list.add("FW01"); break;
 				case RIGHT: list.add("FW01"); break;
-				case LEFT: list.add("FW01"); break;
+				case LEFT: 
+					if (currX > prevX) list.add("BW01");
+					else list.add("FW01"); 
+					break;
 				case DOWN: 
-					if (list.get(list.size()-1) == "BW01") list.add("BW01");
+					if (currY < prevY) list.add("BW01");
+					else if (list.get(list.size()-1) == "BW01") list.add("BW01");
 					else list.add("FW01");
 					
 					break;
@@ -366,7 +388,36 @@ public class main extends JPanel {
 			}
 		}
 //		list.add("FIN");
-		returnObj.put("commands", list);
+		int count = 0;
+		int startindex = 0;
+		int endindex = 0;
+		  for (int i =0; i < list.size(); i++) {
+			   if (list.get(i) == "FW01" || list.get(i) == "BW01") {
+			    if (list.get(i+1) == "FR90" || list.get(i+1) == "FL90") {
+			     list.remove(i);
+			    }
+			   }
+		}
+		  int noTracker = 1;
+		  int bwOrFw = 0;
+		  JSONArray list2 = new JSONArray();
+		  for (int i = 0; i < list.size(); i++) {
+		   if (list.get(i) == "FW01" || list.get(i) == "BW01") {
+		    if (list.get(i) == "FW01") bwOrFw = 1;
+		    if (list.get(i) == "BW01") bwOrFw = 2;
+		    noTracker++;
+		    
+		   }
+		   else {
+		    if (bwOrFw == 1) list2.add(noTracker < 10 ? "FW0" + noTracker : "FW" + noTracker);
+		    else if (bwOrFw == 2) list2.add(noTracker < 10 ? "BW0" + noTracker : "BW" + noTracker);
+		    list2.add(list.get(i));
+		    noTracker = 0;
+		    bwOrFw = 0;
+		   }
+		   //endindex++;
+		  }
+		returnObj.put("commands", list2);
 		System.out.println(returnObj);
 		return returnObj.toJSONString();
 	 
@@ -386,7 +437,7 @@ public class main extends JPanel {
 			Node end = startNode.getNearest(nodes);
 			nodes.remove(end);
 			try {
-
+				closed = new HashSet<Node>();
 				startNode = findPathStartToEndNode(startNode, end);
 			}
 			catch (InterruptedException ex) {
@@ -416,18 +467,18 @@ public class main extends JPanel {
 		closed.add(end);
 		//closed.add(new Node(new Point(100, 425), cellWidth, cellHeight));
 		
-		closed.add(new Node(new Point(100, 400), cellWidth, cellHeight));
-		closed.add(new Node(new Point(100, 425), cellWidth, cellHeight));
-		closed.add(new Node(new Point(100, 450), cellWidth, cellHeight));
-		closed.add(new Node(new Point(100, 475), cellWidth, cellHeight));
-		closed.add(new Node(new Point(75, 400), cellWidth, cellHeight));
-		closed.add(new Node(new Point(75, 425), cellWidth, cellHeight));
-		closed.add(new Node(new Point(75, 450), cellWidth, cellHeight));
-		closed.add(new Node(new Point(75, 475), cellWidth, cellHeight));
-		closed.add(new Node(new Point(50, 400), cellWidth, cellHeight));
-		closed.add(new Node(new Point(50, 425), cellWidth, cellHeight));
-		closed.add(new Node(new Point(50, 450), cellWidth, cellHeight));
-		closed.add(new Node(new Point(50, 475), cellWidth, cellHeight));
+//		closed.add(new Node(new Point(100, 400), cellWidth, cellHeight));
+//		closed.add(new Node(new Point(100, 425), cellWidth, cellHeight));
+//		closed.add(new Node(new Point(100, 450), cellWidth, cellHeight));
+//		closed.add(new Node(new Point(100, 475), cellWidth, cellHeight));
+//		closed.add(new Node(new Point(75, 400), cellWidth, cellHeight));
+//		closed.add(new Node(new Point(75, 425), cellWidth, cellHeight));
+//		closed.add(new Node(new Point(75, 450), cellWidth, cellHeight));
+//		closed.add(new Node(new Point(75, 475), cellWidth, cellHeight));
+//		closed.add(new Node(new Point(50, 400), cellWidth, cellHeight));
+//		closed.add(new Node(new Point(50, 425), cellWidth, cellHeight));
+//		closed.add(new Node(new Point(50, 450), cellWidth, cellHeight));
+//		closed.add(new Node(new Point(50, 475), cellWidth, cellHeight));
 		while (!open.isEmpty()) {
 			Map<Node, Double> costs = new HashMap<Node, Double>();
 			for (Node node : open) {
