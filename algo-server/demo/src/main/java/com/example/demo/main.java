@@ -345,6 +345,11 @@ public class main extends JPanel {
 				turn = changeDirection(pathNodes.get(i).getDirection(),pathNodes.get(i+1).getDirection(), list);
 				list.add(turn);
 			}
+			else if (i == pathNodes.size()-1 && pathNodes.get(i).getDirection() != pathNodes.get(i-1).getDirection()) {
+				String turn = "";
+				turn = changeDirection(pathNodes.get(i).getDirection(),pathNodes.get(i-1).getDirection(), list);
+				list.add(turn);
+			}
 			//basic movement
 			else {
 				switch (pathNodes.get(i).getDirection()) {
@@ -382,7 +387,17 @@ public class main extends JPanel {
 			if (list.get(i) == "FW" || list.get(i) == "BW") {
 				if (list.get(i+1) == "FR90" || list.get(i+1) == "FL90") {
 					String val = list.get(i) == "FW" ? "FW01" : "BW01";
-					list.remove(i+2);
+					// if after turn is not FW then remove after that
+					if (list.get(i+2).toString().contains("SNAP") ) {
+						if (list.get(i+3) == "FW") {
+							list.remove(i+3);
+						}
+					}
+					else {
+						list.remove(i+2);	
+					}
+					//System.out.println("Removed: " + list.get(i));
+					
 					list.remove(i);	
 				}
 			}
