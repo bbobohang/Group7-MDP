@@ -16,16 +16,32 @@ from PIL import Image
 # import algorithm
 
 #  config
-class_dict = {'0': '11', '1': '12', '2': '13', '3': '14', '4': '15', '5': '16', '6': '17', '7': '18', '8': '19',
-              '9': '20', '10': '21', '11': '22', '12': '23', '13': '24', '14': '25', '15': '26', '16': '27', '17': '28',
-              '18': '29', '19': '30', '20': '31', '21': '32', '22': '33', '23': '34', '24': '35', '25': '36',
-              '26': '37', '27': '38', '28': '39', '29': '40', '30': '0'}
-
+image_dict = {'11': '1', '12': '2', '13': '3', '14': '4', '15': '5', '16': '6', '17': '7', '18': '8', '19': '9', "20": "A", "21":"B", "22": "C", "23": "D", "24": "E", "25":"F", "26": "G", "27": "H", "28": "S", "29": "T", "30": "U", "31": "V", "32": "W","33": "X", "34": "Y", "35": "Z", "36": "UP", "37" : "DOWN", "38": "RIGHT", "39": "LEFT", "40": "STOP"} 
 direction_dict = {0: 'U', 2: 'R', 4: 'D', 6: 'L'}
 
-# Getting the images from RPI
-model = torch.hub.load('.', 'custom', path='best.pt', source='local')  # local repo
+# Getting the images from RPI------------------------------------------------------
+#Original dataset
+# model = torch.hub.load('.', 'custom', path='best.pt', source='local')  # local repo
+# print("===== Model loaded =====")
+
+# #Low accuracy for 7,Z,H,C,T,4
+# #Trained with good dataset, grayscaled 3 times
+# model = torch.hub.load('.', 'custom', path='best_good_gray.pt', source='local')  
+# print("===== Model loaded =====")
+
+# #Trained with poor dataset, grayscaled
+# model = torch.hub.load('.', 'custom', path='best_good_gray.pt', source='local')  
+# print("===== Model loaded =====")
+
+# #Trained with good dataset, colored 2 times
+# #Low accuracy for 7,4,T,F
+# model = torch.hub.load('.', 'custom', path='best_color_2.pt', source='local')  
+# print("===== Model loaded =====")
+
+# #Trained with good dataset with missing class, gray 2 times
+model = torch.hub.load('.', 'custom', path='best_gray_2_times_missing_class.pt', source='local')  
 print("===== Model loaded =====")
+#---------------------------------------------------------------------------------
 
 # Socket
 host = "192.168.7.7"
@@ -78,10 +94,15 @@ print("Waiting for bluetooth to start...")
 cap = cv2.VideoCapture()
 # cap.open("http://192.168.192.10:5000/stream.mjpg")
 
-def checklist_capture():
-    cap.open("http://192.168.7.7:5000/stream.mjpg")
+# take image, recognize and store it.
+def capture(expected, id):
+    reply = {}
     THRESHOLD = 0.7
 
+    print("Capture function")
+    
+    """Capture the last image from cv2.videocapture()"""
+    cap.open("http://192.168.7.7:5000/stream.mjpg")
     ret, image = cap.read()
     
     img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -90,90 +111,42 @@ def checklist_capture():
     # recognition
     results = model(img_gray)
     results.render()
-    class_dict = results.names
-
-    res = []
-    boxes = results.xywh[0]
-    """xywh: x,y coordiaante of the center of the bounding box. w,h width height of the bounding box"""
-    print(boxes)
-    for box in boxes:
-        box = box.tolist()
-        print(box)
-        # Image above midpoint, and small => False
-        # if box[1] > 231 and box[3] < 50:
-        #     continue
-        # # Filter by confidence level
-        # elif box[4] > THRESHOLD:
-        #     res.append(box)
-        if box[4] > THRESHOLD:
-            res.append(box)
-
-    if res:
-        biggest_box = res[0]
-        for box in res:
-            if box[2] * box[3] > biggest_box[2] * biggest_box[3]:
-                biggest_box = box
-
-        # Print out the x1, y1, w, h, confidence, and class of predicted object
-        x, y, w, h, conf, cls_num = biggest_box
-        cls = str(int(cls_num))
-        print("class from render: ", cls)
-        x, y, w, h, conf, cls = int(x), int(y), int(w), int(h), round(conf, 2), class_dict.get(int(cls))
-        print("Found: {}, {}, {}, {}, {}, {}".format(x, y, w, h, conf, cls))
-        
-        if(cls != None):
-            print("Savin..")
-            cv2.imwrite(f"./detected_images_checklist/{str(cls)}_conf{str(conf)}_width{w}_height{h}.png",
-                        results.ims[0])
-        return cls
-
-
-# take image, recognize and store it.
-def capture(expected, count_obstacle):
-    # time.sleep(5)
-    print("Capture function")
-    cap.open("http://192.168.7.7:5000/stream.mjpg")
-    THRESHOLD = 0.7
-    """Capture the last image from cv2.videocapture()"""
-    ret, image = cap.read()
-    
-    img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    img_gray = cv2.resize(img_gray, (615, 462))
-
-    # recognition
-    results = model(img_gray)
-    results.render()
-    # To see what's return from the model
-    # print("result \n")
-    # print(vars(results))
 
     """Class Dict"""
     class_dict = results.names
-    # print("Class dict \n")
-    # print(class_dict)
 
     # """Filter out predictions with confidence less than 0.7"""
     #Convert each prediction to a list
     res = []
     boxes = results.xywh[0]
+    boxes = boxes.tolist()
+    
+    #Nothing detected, empty tensor
+    if len(boxes) == 0:
+        print("Nothing captured")
+        return None
+    
     """xywh: x,y coordiaante of the center of the bounding box. w,h width height of the bounding box"""
-    print(boxes)
     for box in boxes:
-        box = box.tolist()
-        print(box)
         # Image above midpoint, and small => False
         # if box[1] > 231 and box[3] < 50:
         #     continue
         # # Filter by confidence level
         # elif box[4] > THRESHOLD:
         #     res.append(box)
+        print(box)
         if box[4] > THRESHOLD:
             res.append(box)
-        else: 
-            return None
-    reply = {}
-    if res:
-        # """If there are multiple objects detected, return the biggest bounding box"""
+    
+    new_res = []
+    #Remove the bulleyes
+    for i in range(len(res)):
+        detected_class = class_dict.get(int(res[i][5]))
+        if(detected_class != "41"):
+            new_res.append(res[i])
+
+    # """If there are multiple objects detected, return the biggest bounding box"""
+    if len(new_res) > 0:
         # biggest_box, mid = res[0], abs(int(res[0][0] - 308))
         # for box in res:
         #     midpoint = abs(int(box[0] - 308))
@@ -181,67 +154,69 @@ def capture(expected, count_obstacle):
         #         biggest_box, mid = box, midpoint
         #     elif box[2] * box[3] > biggest_box[2] * biggest_box[3]:
         #         biggest_box, mid = box, midpoint
-        biggest_box = res[0]
-        for box in res:
+        biggest_box = new_res[0]
+        
+        for box in new_res:
             if box[2] * box[3] > biggest_box[2] * biggest_box[3]:
                 biggest_box = box
+    else:
+        #Image detected but low accuracy
+        print("Low accuracy image")
+        return None
+    
+    # Print out the x1, y1, w, h, confidence, and class of predicted object
+    x, y, w, h, conf, cls_num = biggest_box
+    cls = str(int(cls_num))
 
-        # Print out the x1, y1, w, h, confidence, and class of predicted object
-        x, y, w, h, conf, cls_num = biggest_box
-        cls = str(int(cls_num))
-        if cls != None:
-            print("class from render: ", cls)
-            x, y, w, h, conf, cls = int(x), int(y), int(w), int(h), round(conf, 2), class_dict.get(int(cls))
-            print("Found: {}, {}, {}, {}, {}, {}".format(x, y, w, h, conf, cls))
-            
-            #Send image capture to Bluetooth
-            msg_img = "AN|" + "Detected Image: " + cls
-            s.send(msg_img.encode())
-        else:
-            return reply
+    x, y, w, h, conf, cls = int(x), int(y), int(w), int(h), round(conf, 2), image_dict.get(class_dict.get(int(cls)))
+    print("Found: {}, {}, {}, {}, {}, {}".format(x, y, w, h, conf, cls))
+    
+    #Send image capture to Bluetooth
+    msg_img = "AN|" + "TARGET," + id + ","+ cls
+    s.send(msg_img.encode())
+
+#     """how much is the median_detected off from the median_landscape; l is negative, r is positive"""
+    median_landscape = 640 / 2
+    median_detected = x
+    median_diff = median_detected - median_landscape
+    median_diff = int(median_diff)
+    print("median_diff: ", median_diff)
+
+    reply = {'x': x, 'y': y, 'w': w, 'h': h, 'conf': conf, 'class': cls, 'median': median_diff,
+                'class_num': cls, "median_diff": median_diff}
+
+    # Initialize
+    if cls not in expected:
+        # Creating an empty folder to store the images of that obstacle
+        if(os.path.exists(f"./detected_images/{str(cls)}") == False):
+            os.makedirs(f"./detected_images/{str(cls)}")
         
-    #     """how much is the median_detected off from the median_landscape; l is negative, r is positive"""
-        median_landscape = 640 / 2
-        median_detected = x
-        median_diff = median_detected - median_landscape
-        median_diff = int(median_diff)
-        print("median_diff: ", median_diff)
-
-        reply = {'x': x, 'y': y, 'w': w, 'h': h, 'conf': conf, 'class': cls, 'median': median_diff,
-                 'class_num': cls, "median_diff": median_diff}
-
-        # Initialize
-        if cls not in expected:
-            # Creating an empty folder to store the images of that obstacle
-            if(os.path.exists(f"./detected_images/{str(cls)}") == False):
-                os.makedirs(f"./detected_images/{str(cls)}")
-            
-            expected[cls] = [x, y, w, h, conf, cls, median_diff,
-                             f"./detected_images/{str(cls)}/conf{str(conf)}_width{w}_height{h}_diff{median_diff}.png"]
-            print("*" * 50)
-            print(f"Making new directory for class {cls}")
-            pprint(expected)
-            print("")
-            print("")
-
-        # Save the best images metadata
-        # Best image is large in bounding box, and has good confidence score (+-0.05)
-        #If new image of same id detected and the width(w) and height(h) and conf is more than the original by 0.02 
-        #then replace the original
-        elif (w >= expected[cls][2] and h >= expected[cls][3]) and (conf >= expected[cls][4] - 0.02):
-            expected[cls] = [x, y, w, h, conf, cls, median_diff,
-                             f"./detected_images/{str(cls)}/conf{str(conf)}_width{w}_height{h}_diff{median_diff}.png"]
-            print("*" * 50)
-            print(f"Getting a better image for {cls}")
-            pprint(expected)
-            print("")
-            print("")
-
+        expected[cls] = [x, y, w, h, conf, cls, median_diff,
+                            f"./detected_images/{str(cls)}/conf{str(conf)}_width{w}_height{h}_diff{median_diff}.png"]
         print("*" * 50)
-        print("Saving image")
-        # Save all predicted images
-        cv2.imwrite(f"./detected_images/{str(cls)}/conf{str(conf)}_width{w}_height{h}_diff{median_diff}.png",
-                    results.ims[0])
+        print(f"Making new directory for class {cls}")
+        pprint(expected)
+        print("")
+        print("")
+
+    # Save the best images metadata
+    # Best image is large in bounding box, and has good confidence score (+-0.05)
+    #If new image of same id detected and the width(w) and height(h) and conf is more than the original by 0.02 
+    #then replace the original
+    elif (w >= expected[cls][2] and h >= expected[cls][3]) and (conf >= expected[cls][4] - 0.02):
+        expected[cls] = [x, y, w, h, conf, cls, median_diff,
+                            f"./detected_images/{str(cls)}/conf{str(conf)}_width{w}_height{h}_diff{median_diff}.png"]
+        print("*" * 50)
+        print(f"Getting a better image for {cls}")
+        pprint(expected)
+        print("")
+        print("")
+
+    print("*" * 50)
+    print("Saving image")
+    # Save all predicted images
+    cv2.imwrite(f"./detected_images/{str(cls)}/conf{str(conf)}_width{w}_height{h}_diff{median_diff}.png",
+                results.ims[0])
     return reply
     
 
@@ -388,20 +363,28 @@ try:
     # req = requests.post('http://localhost:8080/api', json=obstaclesJson)
     # commands = req.json().get('commands')
     # print(commands)
-    commands = ["FW03","FR90","FW03","SNAP1","FW04","SNAP2","FW02","FL90","FW01","SNAP3","FW06","FL90","SNAP4","FW02","SNAP5","FW03","FR90","FR90","SNAP6","FIN"]
-    
+
+    commands = ["FW03","FRL-","FW01","SNAP1","FW06","SNAP2","FW04","FR90","FW07","SNAP3","FW07","FR90","FW02","SNAP4","FW08","SNAP5"]
     for command in commands:
         
         print(command)
-        test = input("Next?")
         if "SNAP" in command:
             # time.sleep(2)
-            # captured = capture(expected,1)
-            # if captured == None:
-            #     print("Nothing captured")
-            # else:
-            #     print("Found this: " + captured.get("class"))
-            print("taking photo")
+            id = command[len(command) - 1]
+            captured = capture(expected,id)
+
+            # Move forward 1 grid to snap 
+            if captured == None:
+                #Move forward 1 grid
+                send_to_stm('FW01')
+                stm_movement_reply()
+                captured = capture(expected,id)
+                send_to_stm('BW01')
+                stm_movement_reply()
+                if captured == None:
+                    print("Gone obstacles")
+            else:
+                print("Found this: " + captured.get("class"))
         elif command == "FIN":
             print("ending")
             break
