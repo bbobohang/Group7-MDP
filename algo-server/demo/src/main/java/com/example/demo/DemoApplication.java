@@ -26,7 +26,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class DemoApplication {
 	
 	public static void main(String[] args) {
+		// GUI running here, comment out if dw
+		main test = new main();
+		String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"d\":6,\"x\":5,\"y\":13,\"id\":1},{\"d\":2,\"x\":15,\"y\":15,\"id\":2}, {\"d\":0,\"x\":10,\"y\":15,\"id\":3}, {\"d\":2,\"x\":15,\"y\":7,\"id\":4},{\"d\":6,\"x\":5,\"y\":7,\"id\":5}],\"mode\":\"0\"}}";
+		String outputjson = test.findPathJson(json);
+		
 		SpringApplication.run(DemoApplication.class, args);
+		
 	}
 
 	// @RequestMapping("/response")

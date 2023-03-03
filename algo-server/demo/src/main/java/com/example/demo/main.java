@@ -38,146 +38,147 @@ public class main extends JPanel {
 
 	Map<Point, Color> tiles = new HashMap<Point, Color>();
 
-	Node start = new Node(new Point(25, 450), cellWidth, cellHeight, Direction.UP);
+	Node start = new Node(new Point(25, 450), cellWidth, cellHeight, Direction.UP, Direction.UP);
 
-	Node robot = new Node(new Point(25, 450), cellWidth, cellHeight, Direction.UP);
+	Node robot = new Node(new Point(25, 450), cellWidth, cellHeight, Direction.UP, Direction.UP);
 
 	LinkedHashMap<String, Node> obstacles = new LinkedHashMap<>();
 	LinkedHashMap<String, Node> goals = new LinkedHashMap<>();
 	Set<Node> open = new HashSet<Node>();
 	Set<Node> closed = new HashSet<Node>();
-	
 	Thread simulator = null;
 	boolean pathExists = true;
-	/*
 	JLabel timeLabel = new JLabel();
 	long startTime = System.nanoTime();
 	public main() {
- 		JFrame frame = new JFrame();
- 		frame.setSize(850, 500);
- 		frame.setLocationRelativeTo(null);
- 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
- 		frame.setResizable(false);
+		JFrame frame = new JFrame();
+		frame.setSize(850, 500);
+		frame.setLocationRelativeTo(null);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setResizable(false);
 
- 		ButtonGroup group = new ButtonGroup();
+		ButtonGroup group = new ButtonGroup();
 
- 		JRadioButton startSelect = new JRadioButton("Start");
- 		JRadioButton obsSelect = new JRadioButton("Add Obstacle");
-
-
-
- 		obsSelect.setSelected(true);
-
- 		group.add(startSelect);
- 		group.add(obsSelect);
+		JRadioButton startSelect = new JRadioButton("Start");
+		JRadioButton obsSelect = new JRadioButton("Add Obstacle");
 
 
- 		JButton find = new JButton("Find Path");
- 		find.addActionListener(event -> {
- 			findPath();
- 			repaint();
- 		});
 
- 		JButton reset = new JButton("Reset Path");
- 		reset.addActionListener(event -> {
- 			resetPath();
- 		});
+		obsSelect.setSelected(true);
 
- 		SpringLayout layout = new SpringLayout();
- 		this.setLayout(layout);
- 		layout.putConstraint(SpringLayout.EAST, startSelect, -250, SpringLayout.EAST, this);
- 		layout.putConstraint(SpringLayout.NORTH, startSelect, 30, SpringLayout.NORTH, this);
- 		 this.add(startSelect);
- 		layout.putConstraint(SpringLayout.EAST, find, -60, SpringLayout.EAST, this);
- 		layout.putConstraint(SpringLayout.NORTH, find, 120, SpringLayout.NORTH, this);
- 		this.add(find);
- 		layout.putConstraint(SpringLayout.EAST, reset, 0, SpringLayout.EAST, find);
- 		layout.putConstraint(SpringLayout.NORTH, reset, 50, SpringLayout.NORTH, find);
- 		this.add(reset);
+		group.add(startSelect);
+		group.add(obsSelect);
+
+
+		JButton find = new JButton("Find Path");
+		find.addActionListener(event -> {
+			findPath();
+			repaint();
+		});
+
+		JButton reset = new JButton("Reset Path");
+		reset.addActionListener(event -> {
+			resetPath();
+		});
+
+		SpringLayout layout = new SpringLayout();
+		this.setLayout(layout);
+		layout.putConstraint(SpringLayout.EAST, startSelect, -250, SpringLayout.EAST, this);
+		layout.putConstraint(SpringLayout.NORTH, startSelect, 30, SpringLayout.NORTH, this);
+		// this.add(startSelect);
+		layout.putConstraint(SpringLayout.EAST, find, -60, SpringLayout.EAST, this);
+		layout.putConstraint(SpringLayout.NORTH, find, 120, SpringLayout.NORTH, this);
+		this.add(find);
+		layout.putConstraint(SpringLayout.EAST, reset, 0, SpringLayout.EAST, find);
+		layout.putConstraint(SpringLayout.NORTH, reset, 50, SpringLayout.NORTH, find);
+		this.add(reset);
 		
-         timeLabel.setAlignmentY(Component.BOTTOM_ALIGNMENT);
- 		layout.putConstraint(SpringLayout.EAST, timeLabel,0, SpringLayout.EAST, reset);
- 		layout.putConstraint(SpringLayout.SOUTH, timeLabel, 50, SpringLayout.SOUTH, reset);
- 		timeLabel.setHorizontalAlignment(JLabel.LEFT);
-         timeLabel.setText("Time: 0s");
-         timeLabel.setFont(new Font("ARIAL", Font.BOLD, 15));
-         timeLabel.setMaximumSize(new Dimension(100,40));
-         layout.putConstraint(SpringLayout.SOUTH, timeLabel, 50, SpringLayout.EAST, find);
-         this.add(timeLabel);
+        //timeLabel.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+		layout.putConstraint(SpringLayout.EAST, timeLabel,0, SpringLayout.EAST, reset);
+		layout.putConstraint(SpringLayout.SOUTH, timeLabel, 50, SpringLayout.SOUTH, reset);
+		//timeLabel.setHorizontalAlignment(JLabel.LEFT);
+        timeLabel.setText("Time: 0s");
+        timeLabel.setFont(new Font("ARIAL", Font.BOLD, 15));
+        timeLabel.setMaximumSize(new Dimension(100,40));
+        //layout.putConstraint(SpringLayout.SOUTH, timeLabel, 50, SpringLayout.EAST, find);
+        this.add(timeLabel);
 
- 		this.addMouseListener(new MouseListener() {
- 			@Override
- 			public void mousePressed(MouseEvent e) {
- 				int x = e.getX();
- 				int y = e.getY();
- 				System.out.println("X: " + x + ", Y: " + y);
- 				Node tile = new Node(new Point(cellWidth * ((int) x / cellWidth), cellHeight * ((int) y / cellHeight)),
- 						cellWidth, cellHeight, Direction.UP);
+		this.addMouseListener(new MouseListener() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				int x = e.getX();
+				int y = e.getY();
+				System.out.println("X: " + x + ", Y: " + y);
+				Node tile = new Node(new Point(cellWidth * ((int) x / cellWidth), cellHeight * ((int) y / cellHeight)),
+						cellWidth, cellHeight, Direction.UP, Direction.UP);
+				System.out.println("ACTUAL X: " + x / 25 + ", ACTUAL Y: "+ y / 25);
 
- 				switch (e.getButton()) {
- 				case MouseEvent.BUTTON1:
+				switch (e.getButton()) {
+				case MouseEvent.BUTTON1:
 
- 					 set boundaries for selection area
- 					if (x >= 500 || (x <= 50 && y >= 450)) {
- 						return;
- 					}
+					// set boundaries for selection area
+					if (x >= 500 || (x <= 50 && y >= 450)) {
+						return;
+					}
 
-                 		if(startSelect.isSelected()) {
-                             start = tile;
-                             tiles.put(tile.getPoint(), Color.GRAY);
-                         }
- 					else if (obsSelect.isSelected()) {
- 						addOrChangeObstacleDirection(x, y);
- 					}
+//                		if(startSelect.isSelected()) {
+//                            start = tile;
+//                            tiles.put(tile.getPoint(), Color.GRAY);
+//                        }
+					else if (obsSelect.isSelected()) {
+						addOrChangeObstacleDirection(x, y);
+					}
 
- 					break;
- 				 rc barrier
- 				case MouseEvent.BUTTON3:
- 					tiles.put(tile.getPoint(), Color.BLACK);
- 					closed.add(tile);
- 					break;
- 				}
- 				repaint();
- 			}
+					break;
+				// rc barrier
+				case MouseEvent.BUTTON3:
+					tiles.put(tile.getPoint(), Color.BLACK);
+					closed.add(tile);
+					break;
+				}
+				repaint();
+			}
 
- 			@Override
- 			public void mouseClicked(MouseEvent e) {
+			@Override
+			public void mouseClicked(MouseEvent e) {
 
- 			}
+			}
 
- 			@Override
- 			public void mouseReleased(MouseEvent e) {
+			@Override
+			public void mouseReleased(MouseEvent e) {
 
- 			}
+			}
 
- 			@Override
- 			public void mouseEntered(MouseEvent e) {
+			@Override
+			public void mouseEntered(MouseEvent e) {
 
- 			}
+			}
 
- 			@Override
- 			public void mouseExited(MouseEvent e) {
+			@Override
+			public void mouseExited(MouseEvent e) {
 
- 			}
- 		});
+			}
+		});
 
- 		this.setPreferredSize(frame.getSize());
- 		frame.add(this);
- 		frame.pack();
+		this.setPreferredSize(frame.getSize());
+		frame.add(this);
+		frame.pack();
 
- 		for (int i = 0; i < width; i += cellWidth) {
- 			for (int j = 0; j < height; j += cellHeight) {
- 				tiles.put(new Point(i, j), Color.WHITE);
- 			}
- 		}
+		for (int i = 0; i < width; i += cellWidth) {
+			for (int j = 0; j < height; j += cellHeight) {
+				JLabel l1 = new JLabel(new String(Character.toChars(i)));
+				
+				tiles.put(new Point(i, j), Color.WHITE);
+			}
+		}
 
- 		frame.setVisible(true);
+		frame.setVisible(true);
 	}
 
 	public void addOrChangeObstacleDirection(int x, int y) {
 		//System.out.println("X: " + x + ", Y: " + y);
 		Node node = new Node(new Point(cellWidth * ((int) x / cellWidth), cellHeight * ((int) y / cellHeight)),
-				cellWidth, cellHeight, Direction.UP);
+				cellWidth, cellHeight, Direction.UP, Direction.UP);
 
 		if (!inBounds(new Point(x, y)))
 			return;
@@ -192,10 +193,8 @@ public class main extends JPanel {
 			tiles.put(node.getPoint(), Color.GRAY);
 		}
 		obstacles.put(node.getXYPair(), node);
-
 		repaint();
-		
-	} */
+	}
 
 
 
@@ -206,7 +205,7 @@ public class main extends JPanel {
 	public boolean contains(List<Node> list, Node node) {
 		for (Node n : list) {
 			if (n.equals(node))
-				if (n.dir == node.dir || node.dir == Direction.NONE)
+				if (n.robotdir == node.robotdir || node.robotdir == Direction.NONE)
 				return true;
 		}
 		return false;
@@ -215,7 +214,7 @@ public class main extends JPanel {
 	public boolean contains(Set<Node> list, Node node) {
 		for (Node n : list) {
 			if (n.equals(node))
-				if (n.dir == node.dir || n.dir == Direction.NONE)
+				if (n.robotdir == node.robotdir || n.robotdir == Direction.NONE)
 				return true;
 		}
 		return false;
@@ -225,8 +224,10 @@ public class main extends JPanel {
 		//System.out.println("resetted");
 		obstacles.clear();
 		goals.clear();
-		if (simulator != null) simulator.stop();
-		//timeLabel.setText("Time: 0s");
+		if (simulator != null) {
+			simulator.stop();	
+		}
+		timeLabel.setText("Time: 0s");
 		open = new HashSet<Node>();
 		closed = new HashSet<Node>();
 		robot = new Node(new Point(25, 450), cellWidth, cellHeight);
@@ -242,11 +243,45 @@ public class main extends JPanel {
 	
 	public void updateTime() {
         long stopTime = System.nanoTime();
-        //long current = (stopTime - startTime) / (1000 * 1000 * 1000);
-        //timeLabel.setText("Time: " + current + " s");
+        long current = (stopTime - startTime) / (1000 * 1000 * 1000);
+        timeLabel.setText("Time: " + current + " s");
 	}
 	
-	public Node convertJsonToNode(int x, int y, int dir, int id) {
+
+	public String turnToNextSide(String json) {
+		JSONObject returnObj = new JSONObject();
+        JSONArray list = new JSONArray();
+        list.add("FW1");
+        list.add("FW1");
+        list.add("TR1");
+        list.add("FW1");
+        list.add("FW1");
+        returnObj.put("commands", list);
+		return returnObj.toJSONString();
+	}
+
+	public Node convertJsonToNode(JSONObject jsonNode) {
+		Long x = (Long) jsonNode.get("x");
+		Long y = (Long) jsonNode.get("y");
+		Long dir = (Long) jsonNode.get("d");
+		Long id = (Long) jsonNode.get("id");
+		Point p = new Point(x.intValue() * 25, 475 - (y.intValue() * 25));
+		
+		
+		Node node = new Node(p, cellWidth, cellHeight);
+		switch (dir.intValue()) {
+			case 0: node.dir = Direction.UP; break;
+			case 2: node.dir = Direction.RIGHT; break;
+			case 4: node.dir = Direction.DOWN; break;
+			case 6: node.dir = Direction.LEFT; break;
+			default: node.dir = Direction.UP; break;
+		}
+		node.id = id.intValue();
+		return node;
+	}
+	
+	public Node convertJsonToNodeMDP(int x, int y, int dir, int id) {
+
 		Point p = new Point(x * 25, 475 - (y * 25));
 		
 		
@@ -258,63 +293,43 @@ public class main extends JPanel {
 			case 6: node.dir = Direction.LEFT; break;
 			default: node.dir = Direction.UP; break;
 		}
+		node.id = id;
 		return node;
 	}
-	public String changeDirection(Direction parentdir, Direction currdir, ArrayList<String> list) {
-		if (parentdir == Direction.UP ) {
-			if (currdir == Direction.LEFT) return "FL90";
-			if (currdir == Direction.RIGHT) return "FR90";
-			if (currdir == Direction.DOWN) return "BW01";
+
+
+	
+	@SuppressWarnings("unchecked")
+	public String findPathJson(String json) {
+		 Object obj=JSONValue.parse(json);  
+		 JSONObject jsonObject = (JSONObject) obj;  
+		 System.out.println(jsonObject.get("cat"));
+		 System.out.println(jsonObject.get("value"));
+		 JSONObject value = (JSONObject) jsonObject.get("value");
+		 System.out.println(value.get("mode"));
+		 
+		 JSONArray obstaclesArr = (JSONArray) value.get("obstacles");
+         Iterator<JSONObject> iterator = obstaclesArr.iterator();
+         while (iterator.hasNext()) {
+        	 Node newNode = convertJsonToNode(iterator.next());
+        	 obstacles.put(newNode.getXYPair(), newNode);
+         }
+         Node goal = findPath();
+         Node current = goal;
+		List<Node> pathNodes = new ArrayList();
+		while (!current.equals(start)) {
+				pathNodes.add(0, current);
+				current = current.getParent();
 		}
-		if (parentdir == Direction.DOWN) {
-			if (list.get(list.size()-1) == "BW01") {
-				if (currdir == Direction.LEFT) return "BL90";
-				if (currdir == Direction.RIGHT) return "BR90";
-			}
-			if (currdir == Direction.LEFT) return "FL90";
-			if (currdir == Direction.RIGHT) return "FR90";
-		}
-		if (parentdir == Direction.LEFT ) {
-			if (currdir == Direction.UP) return "FL90";
-			if (currdir == Direction.DOWN) return "FR90";
-			if (currdir == Direction.RIGHT) return "BW01";
-		}
-		if (parentdir == Direction.RIGHT) {
-			if (currdir == Direction.UP) return "FL90";
-			if (currdir == Direction.DOWN) return "FR90";
-			if (currdir == Direction.LEFT) return "BW01";
-		}
-		if (parentdir == Direction.NONE) {
-			return "FW01";
-		}
-		return "WHYCAMEHERE";
+		JSONObject returnObj = ConvertPathToJson.getJsonPath(pathNodes, obstacles.values());
+		return returnObj.toJSONString();
 	}
 	
-	public String turnToNextSide(String json) {
-		  JSONObject returnObj = new JSONObject();
-		        JSONArray list = new JSONArray();
-		        list.add("FW01");
-		        list.add("FW01");
-		        list.add("FR90");
-		        list.add("FW01");
-		        list.add("FW01");
-		        list.add("SNAP");
-		        returnObj.put("commands", list);
-		  return returnObj.toJSONString();
-		 }
-
-	public String findPathJson(JSONObject jsonObject) {
-		 //Object obj=JSONValue.parse(json);  
-		 //JSONObject jsonObject = (JSONObject) obj;  
-		System.out.println(jsonObject.get("cat"));
-		System.out.println(jsonObject.get("value"));
-
-		System.out.println(jsonObject.get("obstacles"));
-		System.out.println(jsonObject.get("mode"));
-
+	@SuppressWarnings("unchecked")
+	public String findPathJsonMDP(JSONObject jsonObject) {
 		ArrayList<LinkedHashMap<String, String>> arrs = (ArrayList) jsonObject.get("obstacles");
 		for (LinkedHashMap obj : arrs) {
-        	Node newNode = convertJsonToNode((int) obj.get("x"), (int) obj.get("y"), (int) obj.get("d"), (int) obj.get("id"));
+        	Node newNode = convertJsonToNodeMDP((int) obj.get("x"), (int) obj.get("y"), (int) obj.get("d"), (int) obj.get("id"));
         	obstacles.put(newNode.getXYPair(), newNode);
 		}
         Node goal = findPath();
@@ -324,129 +339,12 @@ public class main extends JPanel {
 				pathNodes.add(0, current);
 				current = current.getParent();
 		}
-		JSONObject returnObj = new JSONObject();
-		//returnObj.put("data", "mkyong.com");
-        //obj.put("age", 100);
-
-        JSONArray list = new JSONArray();
-        int counter = 1;
-        int currX = -100;
-        int currY = -100;
-        int prevX = -100;
-        int prevY = -100;
-  
-
-		for (Node node : pathNodes) {
-			   if (prevX == -100 ) {
-				    prevX = node.getPoint().x;
-				    prevY = node.getPoint().y;
-				   }
-				   else {
-				    prevX = currX;
-				    prevY = currY;
-				   }
-				   currX = node.getPoint().x;
-				   currY = node.getPoint().y;
-
-		
-			// handle turn commands
-			
-			if (node.getParent().getDirection() != node.getDirection()) {
-				//System.out.println("NODE PARENT DIR: " + node.getParent().getDirection() + ", NODE DIR: " + node.getDirection());
-				String turn = "";
-				turn = changeDirection(node.getParent().getDirection(), node.getDirection(), list);
-				list.add(turn);
-			}
-			//basic movement
-			else {
-				switch (node.dir) {
-				case UP: list.add("FW01"); break;
-				case RIGHT: list.add("FW01"); break;
-				case LEFT: 
-					if (currX > prevX) list.add("BW01");
-					else list.add("FW01"); 
-					break;
-				case DOWN: 
-					if (currY < prevY) list.add("BW01");
-					else if (list.get(list.size()-1) == "BW01") list.add("BW01");
-					else list.add("FW01");
-					
-					break;
-				}	
-			}
-			
-			//check if reached a obstacle then do action
-			for (Node n : obstacles.values()) {
-				//System.out.println("node XY: " + node.getXYPair() + ", n XY: " + n.getActualGoal().getXYPair());
-				if (node.getXYPair().equals(n.getActualGoal().getXYPair()) &&
-						node.getDirection() == n.getActualGoal().getDirection()) {
-					list.add("SNAP" + counter);
-					counter++;
-					//n.setVisited(true);
-					break;
-				}
-			}
-        }
-
-		list.add("FIN");
-		System.out.println("ORIGINAL" + list);
-		for (int i =0; i < list.size(); i++) {
-			if (list.get(i) == "FW" || list.get(i) == "BW") {
-				if (list.get(i+1) == "FR90" || list.get(i+1) == "FL90") {
-					String val = list.get(i) == "FW" ? "FW01" : "BW01";
-					// if after turn is not FW then remove after that
-					if (list.get(i+2).toString().contains("SNAP") ) {
-						if (list.get(i+3) == "FW") {
-							list.remove(i+3);
-						}
-					}
-					else {
-						list.remove(i+2);	
-					}
-					//System.out.println("Removed: " + list.get(i));
-					
-					//list.remove(i);	
-				}
-			}
-		}
-//		list.add("FIN");
-		int count = 0;
-		int startindex = 0;
-		int endindex = 0;
-		  for (int i =0; i < list.size(); i++) {
-			   if (list.get(i) == "FW01" || list.get(i) == "BW01") {
-			    if (list.get(i+1) == "FR90" || list.get(i+1) == "FL90") {
-			     list.remove(i);
-			    }
-			   }
-		}
-		  int noTracker = 1;
-		  int bwOrFw = 0;
-		  JSONArray list2 = new JSONArray();
-		  for (int i = 0; i < list.size(); i++) {
-		   if (list.get(i) == "FW01" || list.get(i) == "BW01") {
-		    if (list.get(i) == "FW01") bwOrFw = 1;
-		    if (list.get(i) == "BW01") bwOrFw = 2;
-		    noTracker++;
-		    
-		   }
-		   else {
-		    if (bwOrFw == 1) list2.add(noTracker < 10 ? "FW0" + noTracker : "FW" + noTracker);
-		    else if (bwOrFw == 2) list2.add(noTracker < 10 ? "BW0" + noTracker : "BW" + noTracker);
-		    list2.add(list.get(i));
-		    noTracker = 0;
-		    bwOrFw = 0;
-		   }
-		   //endindex++;
-		  }
-		returnObj.put("commands", list2);
-		System.out.println(returnObj);
+		JSONObject returnObj = ConvertPathToJson.getJsonPath(pathNodes, obstacles.values());
 		return returnObj.toJSONString();
-	 
 	}
 
 	public Node findPath() {
-		//startTime = System.nanoTime();
+		startTime = System.nanoTime();
 		// have to copy to a new var, cant just use obstacle.values as it is being used
 		// to draw the nodes
 		Collection<Node> nodes = new HashSet<Node>(obstacles.values().size());
@@ -457,6 +355,7 @@ public class main extends JPanel {
 		Node startNode = start;
 		while (!nodes.isEmpty()) {
 			Node end = startNode.getNearest(nodes);
+			//System.out.println(end.robotdir);
 			nodes.remove(end);
 			try {
 				closed = new HashSet<Node>();
@@ -466,20 +365,20 @@ public class main extends JPanel {
 				ex.printStackTrace();
 			} 
 			open = new HashSet<Node>();
-			//closed = new HashSet<Node>();
 		}
 	final Node copiedNode = startNode;
-//	drawPathAlgo(copiedNode);
-//		simulator = new Thread(() -> {
-//
-//		try {
-//			drawPath(copiedNode);
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	});
-//		simulator.start();
+	drawPathAlgo(copiedNode);
+
+		simulator = new Thread(() -> {
+
+		try {
+			drawPath(copiedNode);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	});
+		simulator.start();
 		return copiedNode;
 		
 	}
@@ -489,10 +388,10 @@ public class main extends JPanel {
 		closed.add(end);
 		//closed.add(new Node(new Point(100, 425), cellWidth, cellHeight));
 		
-//		closed.add(new Node(new Point(100, 400), cellWidth, cellHeight));
-//		closed.add(new Node(new Point(100, 425), cellWidth, cellHeight));
-//		closed.add(new Node(new Point(100, 450), cellWidth, cellHeight));
-//		closed.add(new Node(new Point(100, 475), cellWidth, cellHeight));
+		//closed.add(new Node(new Point(100, 400), cellWidth, cellHeight));
+		//closed.add(new Node(new Point(100, 425), cellWidth, cellHeight));
+		//closed.add(new Node(new Point(100, 450), cellWidth, cellHeight));
+		//closed.add(new Node(new Point(100, 475), cellWidth, cellHeight));
 //		closed.add(new Node(new Point(75, 400), cellWidth, cellHeight));
 //		closed.add(new Node(new Point(75, 425), cellWidth, cellHeight));
 //		closed.add(new Node(new Point(75, 450), cellWidth, cellHeight));
@@ -516,24 +415,22 @@ public class main extends JPanel {
 			// NOT SAME
 			Node currentNodeWithDir = current.clone();
 			closed.add(currentNodeWithDir);
-			
-			for (Node n : end.getSurroundingNodes()) {
-				closed.add(n);
+			for (Node oneObs : obstacles.values() ) {
+				for (Node n : oneObs.getSurroundingNodes()) {
+					closed.add(n);
+				}
 			}
-			// if current == end then found goal, end loop
 			
-			if (current.equals(actualGoal) && current.dir == actualGoal.dir) {
-				// obstacles.put(actualGoal.getXYPair(), current);
-//				System.out.println("came here");
-//				drawPath(current);
+			// if current == end then found goal, end loop
+			if (current.equals(actualGoal) && current.robotdir == actualGoal.robotdir) {
 				return current;
 			}
 
 			//
-			for (Node adjacent : current.getAdjacentNodes(open)) {
+			for (Node adjacent : current.getAdjacentNodes(open,current.robotdir)) {
+				// contains check robotdir match, not only node XY coordinate
 				if (contains(closed, adjacent) || !inBounds(adjacent.getPoint()))
 					continue;
-				//System.out.println("ADJACENT DIR " + adjacent.dir);
 				double newG = current.g + adjacent.getHeuristic(current);
 				if (newG < adjacent.g || !contains(open, adjacent)) {
 					adjacent.g = newG;
@@ -556,35 +453,27 @@ public class main extends JPanel {
 		for (Node n : obstacles.values()) {
 			//System.out.println("node XY: " + node.getXYPair() + ", n XY: " + n.getActualGoal().getXYPair());
 			if (node.getXYPair().equals(n.getActualGoal().getXYPair()) &&
-					node.getDirection() == n.getActualGoal().getDirection()) {
+					node.robotdir == n.getActualGoal().robotdir) {
 
 				n.setVisited(true);
 			}
 		}
-		//System.out.println("DIRECTION OF ROBOT: " + robot.dir);
 		updateTime();
 		repaint();
 		Thread.sleep(500);
 		
 	}	
 	
+	// draw out path in tiles
 	public void drawPathAlgo(Node actualGoal) {
 		if (pathExists) {
 			Node current = actualGoal;
 			
 			while (!current.equals(start)) {
 				//System.out.println("Current: X" + current.getParent().getPoint().x + ", Y:" + current.getParent().getPoint().y);
-				System.out.println("Draw Path X: " + current.getParent().getPoint().getX()+" Path Y: " + current.getParent().getPoint().getY());
+				//System.out.println("Draw Path X: " + current.getParent().getPoint().getX()+" Path Y: " + current.getParent().getPoint().getY());
 				tiles.put(current.getParent().getPoint(), Color.GRAY);
 
-				
-				//Node node = new Node(new Point(current.getParent().getPoint().x, current.getParent().getPoint().y), cellWidth, cellHeight);
-				//robot.setPoint();
-				//validate(); 
-
-				
-//				System.out.println("Robot: X" + robot.getPoint().x + ", Y:" + robot.getPoint().y);
-				
 				current = current.getParent();
 			}
 		}
@@ -592,41 +481,26 @@ public class main extends JPanel {
 		repaint();
 	}
 
+	// used for the robot movement
 	public void drawPath(Node actualGoal) {
 		if (pathExists) {
 			Node current = actualGoal;
 			List<Node> pathNodes = new ArrayList();
+			
 			// move nodes to a list
 			while (!current.equals(start)) {
 				pathNodes.add(0, current);
 				current = current.getParent();
 			}
+			//ConvertPathToJson.getJsonPath(pathNodes, obstacles.values());
 			for (Node n : pathNodes) {
 				try {
 					updateMovement(n);
+					//System.out.println(n.getXYPair() + ",RobotFacing:" + n.robotdir + ",RobotNode:" + n.getDirection());
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 			}
-			
-//			while (!current.equals(start)) {
-//				System.out.println("Current: X" + current.getParent().getPoint().x + ", Y:" + current.getParent().getPoint().y);
-//				//tiles.put(current.getParent().getPoint(), Color.GRAY);
-//				Node node = new Node(new Point(current.getParent().getPoint().x, current.getParent().getPoint().y), cellWidth, cellHeight);
-//				//robot.setPoint();
-//				//validate(); 
-//				 
-//				try {
-//
-//					updateMovement(node);
-//				} catch (Exception ex) {
-//					ex.printStackTrace();
-//				}
-//				
-//				System.out.println("Robot: X" + robot.getPoint().x + ", Y:" + robot.getPoint().y);
-//				
-//				current = current.getParent();
-//			}
 		}
 		repaint();
 	}
@@ -643,7 +517,6 @@ public class main extends JPanel {
 				g.setColor(Color.decode("#a5be002"));
 			else
 				g.setColor(Color.decode("#ff0700"));
-			//System.out.println("obs dir: " + obs.dir);
 			if (obs.dir == Direction.UP)
 				g.fillRect(obs.getPoint().x, obs.getPoint().y, cellWidth, heightOfImage);
 			else if (obs.dir == Direction.DOWN)
@@ -664,9 +537,10 @@ public class main extends JPanel {
 		for (Map.Entry<Point, Color> tile : tiles.entrySet()) {
 			tool.setColor(tile.getValue());
 			tool.fillRect(tile.getKey().x, tile.getKey().y, cellWidth, cellHeight);
+			tool.drawString("a", tile.getKey().x, tile.getKey().y);
 		}
 		// start area
-		drawStartingGrid(tool);
+		//drawStartingGrid(tool);
 		tool.setColor(Color.BLACK);
 		for (int i = 0; i < width; i += cellWidth) {
 			tool.drawLine(i, 0, i, height);
@@ -692,9 +566,7 @@ public class main extends JPanel {
 		int x = robot.getPoint().x -12;
 		int y = robot.getPoint().y-26;
 
-		Direction robotDir = robot.getDirection();
-
-		//Direction robotDir = Direction.DOWN;
+		Direction robotDir = robot.robotdir;
 		//System.out.println("UPdated robot X: " + x + ", Y: " + y);
 
 		switch(robotDir){
@@ -878,15 +750,8 @@ public class main extends JPanel {
 		 //System.out.println(jsonObject.get("value"));
 		 //JSONObject value = (JSONObject) jsonObject.get("value");
 		 //System.out.println(value.get("mode"));
-		String outputjson = findPathJson(input);
+		String outputjson = findPathJsonMDP(input);
 		return outputjson;
-		}
-//	 public static void main(String[] args) {
-//	 	main simulator = new main();
-//	 	//String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"x\":3,\"y\":15,\"id\":1,\"d\":4},{\"x\":16,\"y\":18,\"id\":2,\"d\":2},{\"x\":14,\"y\":11,\"id\":3,\"d\":4},{\"x\":7,\"y\":6,\"id\":4,\"d\":2},{\"x\":17,\"y\":6,\"id\":5,\"d\":0},{\"x\":8,\"y\":15,\"id\":6,\"d\":6}],\"mode\":\"0\"}}";
-//	 	String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"x\":16,\"y\":18,\"id\":2,\"d\":2},{\"x\":14,\"y\":11,\"id\":3,\"d\":4},{\"x\":7,\"y\":6,\"id\":4,\"d\":2},{\"x\":17,\"y\":6,\"id\":5,\"d\":0},{\"x\":8,\"y\":15,\"id\":6,\"d\":6}],\"mode\":\"0\"}}";
-//		
-//	 	String outputjson = simulator.findPathJson(json);
-//	 }
+	}
 
 }
