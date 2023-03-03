@@ -147,6 +147,7 @@ public class ConvertPathToJson {
 			if (i == list.size() - 1) {
 				list2.add(list.get(i));
 				break;
+
 			}
 			
 			if (command == list.get(i+1).toString()) {

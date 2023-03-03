@@ -174,6 +174,7 @@ def capture(expected, id):
     #Send image capture to Bluetooth
     msg_img = "AN|" + "TARGET," + id + ","+ cls
     s.send(msg_img.encode())
+    time.sleep(0.5)
 
 #     """how much is the median_detected off from the median_landscape; l is negative, r is positive"""
     median_landscape = 640 / 2
@@ -357,16 +358,15 @@ try:
     # if(os.path.exists(f"./detected_images_checklist/") == False):
     #     os.makedirs(f"./detected_images_checklist/")
     # obstaclesString = s.recv(buffer).decode()
-    # print("string from bt:" + obstaclesString)
     # obstaclesJson = json.loads(obstaclesString)
     # headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
     # req = requests.post('http://localhost:8080/api', json=obstaclesJson)
     # commands = req.json().get('commands')
     # print(commands)
 
-    commands = ["FW03","FRL-","FW01","SNAP1","FW06","SNAP2","FW04","FR90","FW07","SNAP3","FW07","FR90","FW02","SNAP4","FW08","SNAP5"]
+    commands = ["FW03","FRL-","FW01","SNAP5","FW06","SNAP1","FW04","FR90","FW07","SNAP3","FW07","FR90","FW02","SNAP2","FW08","SNAP4","FIN"]
     for command in commands:
-        
+        time.sleep(5)
         print(command)
         if "SNAP" in command:
             # time.sleep(2)
