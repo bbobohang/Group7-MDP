@@ -5,6 +5,8 @@ import javax.swing.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -51,130 +53,131 @@ public class main extends JPanel {
 	public main() {
 		
 	}
-	//	public main() {
-//		JFrame frame = new JFrame();
-//		frame.setSize(850, 500);
-//		frame.setLocationRelativeTo(null);
-//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		frame.setResizable(false);
-//
-//		ButtonGroup group = new ButtonGroup();
-//
-//		JRadioButton startSelect = new JRadioButton("Start");
-//		JRadioButton obsSelect = new JRadioButton("Add Obstacle");
-//
-//
-//
-//		obsSelect.setSelected(true);
-//
-//		group.add(startSelect);
-//		group.add(obsSelect);
-//
-//
-//		JButton find = new JButton("Find Path");
-//		find.addActionListener(event -> {
-//			findPath();
-//			repaint();
-//		});
-//
-//		JButton reset = new JButton("Reset Path");
-//		reset.addActionListener(event -> {
-//			resetPath();
-//		});
-//
-//		SpringLayout layout = new SpringLayout();
-//		this.setLayout(layout);
-//		layout.putConstraint(SpringLayout.EAST, startSelect, -250, SpringLayout.EAST, this);
-//		layout.putConstraint(SpringLayout.NORTH, startSelect, 30, SpringLayout.NORTH, this);
-//		// this.add(startSelect);
-//		layout.putConstraint(SpringLayout.EAST, find, -60, SpringLayout.EAST, this);
-//		layout.putConstraint(SpringLayout.NORTH, find, 120, SpringLayout.NORTH, this);
-//		this.add(find);
-//		layout.putConstraint(SpringLayout.EAST, reset, 0, SpringLayout.EAST, find);
-//		layout.putConstraint(SpringLayout.NORTH, reset, 50, SpringLayout.NORTH, find);
-//		this.add(reset);
-//		
-//        //timeLabel.setAlignmentY(Component.BOTTOM_ALIGNMENT);
-//		layout.putConstraint(SpringLayout.EAST, timeLabel,0, SpringLayout.EAST, reset);
-//		layout.putConstraint(SpringLayout.SOUTH, timeLabel, 50, SpringLayout.SOUTH, reset);
-//		//timeLabel.setHorizontalAlignment(JLabel.LEFT);
-//        timeLabel.setText("Time: 0s");
-//        timeLabel.setFont(new Font("ARIAL", Font.BOLD, 15));
-//        timeLabel.setMaximumSize(new Dimension(100,40));
-//        //layout.putConstraint(SpringLayout.SOUTH, timeLabel, 50, SpringLayout.EAST, find);
-//        this.add(timeLabel);
-//
-//		this.addMouseListener(new MouseListener() {
-//			@Override
-//			public void mousePressed(MouseEvent e) {
-//				int x = e.getX();
-//				int y = e.getY();
-//				System.out.println("X: " + x + ", Y: " + y);
-//				Node tile = new Node(new Point(cellWidth * ((int) x / cellWidth), cellHeight * ((int) y / cellHeight)),
-//						cellWidth, cellHeight, Direction.UP, Direction.UP);
-//				System.out.println("ACTUAL X: " + x / 25 + ", ACTUAL Y: "+ y / 25);
-//
-//				switch (e.getButton()) {
-//				case MouseEvent.BUTTON1:
-//
-//					// set boundaries for selection area
-//					if (x >= 500 || (x <= 50 && y >= 450)) {
-//						return;
-//					}
-//
-////                		if(startSelect.isSelected()) {
-////                            start = tile;
-////                            tiles.put(tile.getPoint(), Color.GRAY);
-////                        }
-//					else if (obsSelect.isSelected()) {
-//						addOrChangeObstacleDirection(x, y);
-//					}
-//
-//					break;
-//				// rc barrier
-//				case MouseEvent.BUTTON3:
-//					tiles.put(tile.getPoint(), Color.BLACK);
-//					closed.add(tile);
-//					break;
-//				}
-//				repaint();
-//			}
-//
-//			@Override
-//			public void mouseClicked(MouseEvent e) {
-//
-//			}
-//
-//			@Override
-//			public void mouseReleased(MouseEvent e) {
-//
-//			}
-//
-//			@Override
-//			public void mouseEntered(MouseEvent e) {
-//
-//			}
-//
-//			@Override
-//			public void mouseExited(MouseEvent e) {
-//
-//			}
-//		});
-//
-//		this.setPreferredSize(frame.getSize());
-//		frame.add(this);
-//		frame.pack();
-//
-//		for (int i = 0; i < width; i += cellWidth) {
-//			for (int j = 0; j < height; j += cellHeight) {
-//				JLabel l1 = new JLabel(new String(Character.toChars(i)));
-//				
-//				tiles.put(new Point(i, j), Color.WHITE);
-//			}
-//		}
-//
-//		frame.setVisible(true);
-//	}
+	public void createGUI() {
+		JFrame frame = new JFrame();
+		frame.setSize(850, 500);
+		frame.setLocationRelativeTo(null);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setResizable(false);
+
+		ButtonGroup group = new ButtonGroup();
+
+		JRadioButton startSelect = new JRadioButton("Start");
+		JRadioButton obsSelect = new JRadioButton("Add Obstacle");
+
+
+
+		obsSelect.setSelected(true);
+
+		group.add(startSelect);
+		group.add(obsSelect);
+
+
+		JButton find = new JButton("Find Path");
+		find.addActionListener(event -> {
+			findPath();
+			repaint();
+		});
+
+		JButton reset = new JButton("Reset Path");
+		reset.addActionListener(event -> {
+			resetPath();
+		});
+
+		SpringLayout layout = new SpringLayout();
+		this.setLayout(layout);
+		layout.putConstraint(SpringLayout.EAST, startSelect, -250, SpringLayout.EAST, this);
+		layout.putConstraint(SpringLayout.NORTH, startSelect, 30, SpringLayout.NORTH, this);
+		// this.add(startSelect);
+		layout.putConstraint(SpringLayout.EAST, find, -60, SpringLayout.EAST, this);
+		layout.putConstraint(SpringLayout.NORTH, find, 120, SpringLayout.NORTH, this);
+		this.add(find);
+		layout.putConstraint(SpringLayout.EAST, reset, 0, SpringLayout.EAST, find);
+		layout.putConstraint(SpringLayout.NORTH, reset, 50, SpringLayout.NORTH, find);
+		this.add(reset);
+		
+        //timeLabel.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+		layout.putConstraint(SpringLayout.EAST, timeLabel,0, SpringLayout.EAST, reset);
+		layout.putConstraint(SpringLayout.SOUTH, timeLabel, 50, SpringLayout.SOUTH, reset);
+		//timeLabel.setHorizontalAlignment(JLabel.LEFT);
+        timeLabel.setText("Time: 0s");
+        timeLabel.setFont(new Font("ARIAL", Font.BOLD, 15));
+        timeLabel.setMaximumSize(new Dimension(100,40));
+        //layout.putConstraint(SpringLayout.SOUTH, timeLabel, 50, SpringLayout.EAST, find);
+        this.add(timeLabel);
+
+		this.addMouseListener(new MouseListener() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				int x = e.getX();
+				int y = e.getY();
+				System.out.println("X: " + x + ", Y: " + y);
+				Node tile = new Node(new Point(cellWidth * ((int) x / cellWidth), cellHeight * ((int) y / cellHeight)),
+						cellWidth, cellHeight, Direction.UP, Direction.UP);
+				System.out.println("ACTUAL X: " + x / 25 + ", ACTUAL Y: "+ y / 25);
+
+				switch (e.getButton()) {
+				case MouseEvent.BUTTON1:
+
+					// set boundaries for selection area
+					if (x >= 500 || (x <= 50 && y >= 450)) {
+						return;
+					}
+
+//                		if(startSelect.isSelected()) {
+//                            start = tile;
+//                            tiles.put(tile.getPoint(), Color.GRAY);
+//                        }
+					else if (obsSelect.isSelected()) {
+						addOrChangeObstacleDirection(x, y);
+					}
+
+					break;
+				// rc barrier
+				case MouseEvent.BUTTON3:
+					tiles.put(tile.getPoint(), Color.BLACK);
+					closed.add(tile);
+					break;
+				}
+				repaint();
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+
+			}
+		});
+
+		this.setPreferredSize(frame.getSize());
+		frame.add(this);
+		frame.pack();
+
+		for (int i = 0; i < width; i += cellWidth) {
+			for (int j = 0; j < height; j += cellHeight) {
+				JLabel l1 = new JLabel(new String(Character.toChars(i)));
+				
+				tiles.put(new Point(i, j), Color.WHITE);
+			}
+		}
+
+		frame.setVisible(true);
+	}
+
 
 	public void addOrChangeObstacleDirection(int x, int y) {
 		//System.out.println("X: " + x + ", Y: " + y);
@@ -331,6 +334,7 @@ public class main extends JPanel {
 		ArrayList<LinkedHashMap<String, String>> arrs = (ArrayList) jsonObject.get("obstacles");
 		for (LinkedHashMap obj : arrs) {
         	Node newNode = convertJsonToNodeMDP((int) obj.get("x"), (int) obj.get("y"), (int) obj.get("d"), (int) obj.get("id"));
+        	System.out.println(newNode.getXYPair()+ ",Direction: " + newNode.getDirection());
         	obstacles.put(newNode.getXYPair(), newNode);
 		}
         Node goal = findPath();
@@ -368,18 +372,18 @@ public class main extends JPanel {
 			open = new HashSet<Node>();
 		}
 	final Node copiedNode = startNode;
-	drawPathAlgo(copiedNode);
-
-		simulator = new Thread(() -> {
-
-		try {
-			drawPath(copiedNode);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	});
-		simulator.start();
+//	drawPathAlgo(copiedNode);
+//
+//		simulator = new Thread(() -> {
+//
+//		try {
+//			drawPath(copiedNode);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	});
+//		simulator.start();
 		return copiedNode;
 		
 	}
@@ -752,6 +756,7 @@ public class main extends JPanel {
 		 //JSONObject value = (JSONObject) jsonObject.get("value");
 		 //System.out.println(value.get("mode"));
 		String outputjson = findPathJsonMDP(input);
+		resetPath();
 		return outputjson;
 	}
 //	public static void main(String[] args) {

@@ -117,23 +117,6 @@ public class ConvertPathToJson {
 					list.remove(i+1);
 			}
 			}
-//			if (list.get(i) == "FW" || list.get(i) == "BW") {
-//				if (list.get(i+1) == "FR90" || list.get(i+1) == "FL90") {
-//					String val = list.get(i) == "FW" ? "FW01" : "BW01";
-//					// if after turn is not FW then remove after that
-//					if (list.get(i+2).toString().contains("SNAP") ) {
-//						if (list.get(i+3) == "FW") {
-//							//list.remove(i+3);
-//						}
-//					}
-//					else if (list.get(i+2) == "FW" || list.get(i+2) == "BW"){
-//						list.remove(i+2);	
-//					}
-//					//System.out.println("Removed: " + list.get(i));
-//					
-//					//list.remove(i);	
-//				}
-//			}
 		}
 		System.out.println("EDIT 1" + list);
 		int noTracker = 1;
