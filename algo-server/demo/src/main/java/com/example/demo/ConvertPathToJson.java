@@ -34,10 +34,12 @@ public class ConvertPathToJson {
 				if (i != pathNodes.size()-1 && pathNodes.get(i).robotdir != pathNodes.get(i+1).robotdir ) {
 					//System.out.println("hit here");
 					for (Node n : obstacleNodes) {
-						if (checkIfReachGoalNode(n, n.getActualGoal())) {
-							list.add(n.robotdir == n.dir ? "FW" : "BW");
+						if (checkIfReachGoalNode(pathNodes.get(i), n.getActualGoal())) {
+							list.add(pathNodes.get(i).robotdir == pathNodes.get(i).dir ? "FW" : "BW");
 							list.add("SNAP" + n.id);
 							counter++;
+							//n.setVisited(true);
+							break;
 						}
 					}
 					String turn = "";
@@ -54,10 +56,11 @@ public class ConvertPathToJson {
 					//check if reached a obstacle then do action
 					for (Node n : obstacleNodes) {
 						//System.out.println("node XY: " + node.getXYPair() + ", n XY: " + n.getActualGoal().getXYPair());
-						if (checkIfReachGoalNode(n, n.getActualGoal())) {
-							list.add(n.robotdir == n.dir ? "FW" : "BW");
+						if (checkIfReachGoalNode(pathNodes.get(i), n.getActualGoal())) {
 							list.add("SNAP" + n.id);
 							counter++;
+							//n.setVisited(true);
+							break;
 						}
 					}
 				}
@@ -82,10 +85,11 @@ public class ConvertPathToJson {
 					//check if reached a obstacle then do action
 					for (Node n : obstacleNodes) {
 						//System.out.println("node XY: " + node.getXYPair() + ", n XY: " + n.getActualGoal().getXYPair());
-						if (checkIfReachGoalNode(n, n.getActualGoal())) {
-							list.add(n.robotdir == n.dir ? "FW" : "BW");
+						if (checkIfReachGoalNode(pathNodes.get(i), n.getActualGoal())) {
 							list.add("SNAP" + n.id);
 							counter++;
+							//n.setVisited(true);
+							break;
 						}
 					}
 				}

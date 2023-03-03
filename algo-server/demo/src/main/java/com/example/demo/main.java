@@ -492,11 +492,11 @@ public class main extends JPanel {
 				pathNodes.add(0, current);
 				current = current.getParent();
 			}
-			ConvertPathToJson.getJsonPath(pathNodes, obstacles.values());
+			//ConvertPathToJson.getJsonPath(pathNodes, obstacles.values());
 			for (Node n : pathNodes) {
 				try {
 					updateMovement(n);
-					System.out.println(n.getXYPair() + ",RobotFacing:" + n.robotdir + ",RobotNode:" + n.getDirection());
+					//System.out.println(n.getXYPair() + ",RobotFacing:" + n.robotdir + ",RobotNode:" + n.getDirection());
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
