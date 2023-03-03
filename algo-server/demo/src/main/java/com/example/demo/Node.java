@@ -234,12 +234,12 @@ public class Node implements Cloneable {
     		switch (this.dir) {
     		case LEFT:
     			actualGoal.getPoint().x -= (3 * cellWidth);
-    			actualGoal.getPoint().y += (1 * cellWidth);
+    			actualGoal.getPoint().y -= (1 * cellWidth);
     			actualGoal.robotdir = Direction.UP;
     			break;
     		case RIGHT:
     			actualGoal.getPoint().x += (3 * cellWidth);
-    			actualGoal.getPoint().y -= (1 * cellWidth);
+    			actualGoal.getPoint().y += (1 * cellWidth);
     			actualGoal.robotdir = Direction.DOWN;
     			break;
     		case UP:
