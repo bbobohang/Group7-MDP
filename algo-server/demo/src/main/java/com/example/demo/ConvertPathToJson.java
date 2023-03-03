@@ -9,6 +9,17 @@ import org.json.simple.JSONObject;
 
 public class ConvertPathToJson {
 	//converting path found to robots command logic
+		private static boolean checkIfReachGoalNode(Node currNode, Node actualGoal) {
+			if ( currNode.getXYPair().equals(actualGoal.getXYPair()) &&
+					currNode.robotdir == actualGoal.robotdir) {
+				//if future change dir then add a forward or backward here first to snap depending on robotfacing and node,
+
+				//n.setVisited(true);
+				return true;
+			}
+			return false;
+		}
+		
 		public static JSONObject getJsonPath(List<Node> pathNodes, Collection<Node> obstacleNodes) {
 			JSONObject returnObj = new JSONObject();
 
@@ -23,14 +34,10 @@ public class ConvertPathToJson {
 				if (i != pathNodes.size()-1 && pathNodes.get(i).robotdir != pathNodes.get(i+1).robotdir ) {
 					//System.out.println("hit here");
 					for (Node n : obstacleNodes) {
-						if ( pathNodes.get(i).getXYPair().equals(n.getActualGoal().getXYPair()) &&
-								pathNodes.get(i).robotdir == n.getActualGoal().robotdir) {
-							//if future change dir then add a forward or backward here first to snap depending on robotfacing and node,
-							list.add(pathNodes.get(i).robotdir == pathNodes.get(i).dir ? "FW" : "BW");
-							list.add("SNAP" + counter);
+						if (checkIfReachGoalNode(n, n.getActualGoal())) {
+							list.add(n.robotdir == n.dir ? "FW" : "BW");
+							list.add("SNAP" + n.id);
 							counter++;
-							//n.setVisited(true);
-							break;
 						}
 					}
 					String turn = "";
@@ -47,12 +54,10 @@ public class ConvertPathToJson {
 					//check if reached a obstacle then do action
 					for (Node n : obstacleNodes) {
 						//System.out.println("node XY: " + node.getXYPair() + ", n XY: " + n.getActualGoal().getXYPair());
-						if ( pathNodes.get(i).getXYPair().equals(n.getActualGoal().getXYPair()) &&
-								pathNodes.get(i).robotdir == n.getActualGoal().robotdir) {
+						if (checkIfReachGoalNode(n, n.getActualGoal())) {
+							list.add(n.robotdir == n.dir ? "FW" : "BW");
 							list.add("SNAP" + n.id);
 							counter++;
-							//n.setVisited(true);
-							break;
 						}
 					}
 				}
@@ -77,12 +82,10 @@ public class ConvertPathToJson {
 					//check if reached a obstacle then do action
 					for (Node n : obstacleNodes) {
 						//System.out.println("node XY: " + node.getXYPair() + ", n XY: " + n.getActualGoal().getXYPair());
-						if ( pathNodes.get(i).getXYPair().equals(n.getActualGoal().getXYPair()) &&
-								pathNodes.get(i).robotdir == n.getActualGoal().robotdir) {
-							list.add("SNAP" + counter);
+						if (checkIfReachGoalNode(n, n.getActualGoal())) {
+							list.add(n.robotdir == n.dir ? "FW" : "BW");
+							list.add("SNAP" + n.id);
 							counter++;
-							//n.setVisited(true);
-							break;
 						}
 					}
 				}
