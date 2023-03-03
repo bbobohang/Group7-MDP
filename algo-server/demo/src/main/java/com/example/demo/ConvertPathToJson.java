@@ -106,28 +106,24 @@ public class ConvertPathToJson {
 					}
 					//add if turn is BR90/FL90 == negative do forward
 				}
-				if (list.get(i) == "FR90" || list.get(i) == "FL90") {
+				// add in backwards here as well
+				if (list.get(i) == "FR90" && list.get(i+1) == "FL90") {
+					list.remove(i);
+					list.remove(i);	
+					list.add(i, "FRL-");
+				}
+				else if (list.get(i) == "FL90" && list.get(i+1) == "FR90") {
+					list.remove(i);
+					list.remove(i);
+					list.add(i, "FLR-");
+				}
+				// add in backwords condition here as well
+				if (list.get(i) == "FR90" || list.get(i) == "FL90" || list.get(i) == "FRL-" || list.get(i) == "FLR-") {
 					if ((list.get(i+1) == "FW" || list.get(i+1) == "BW")) {
 						list.remove(i+1);
 				}
 				}
-//				if (list.get(i) == "FW" || list.get(i) == "BW") {
-//					if (list.get(i+1) == "FR90" || list.get(i+1) == "FL90") {
-//						String val = list.get(i) == "FW" ? "FW01" : "BW01";
-//						// if after turn is not FW then remove after that
-//						if (list.get(i+2).toString().contains("SNAP") ) {
-//							if (list.get(i+3) == "FW") {
-//								//list.remove(i+3);
-//							}
-//						}
-//						else if (list.get(i+2) == "FW" || list.get(i+2) == "BW"){
-//							list.remove(i+2);	
-//						}
-//						//System.out.println("Removed: " + list.get(i));
-//						
-//						//list.remove(i);	
-//					}
-//				}
+
 			}
 			System.out.println("EDIT 1" + list);
 			int noTracker = 1;
