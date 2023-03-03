@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-
 public class Node implements Cloneable {
         private Point point;
         private int cellWidth;
@@ -235,18 +234,22 @@ public class Node implements Cloneable {
     		switch (this.dir) {
     		case LEFT:
     			actualGoal.getPoint().x -= (3 * cellWidth);
+    			actualGoal.getPoint().y -= (1 * cellWidth);
     			actualGoal.robotdir = Direction.UP;
     			break;
     		case RIGHT:
     			actualGoal.getPoint().x += (3 * cellWidth);
+    			actualGoal.getPoint().y += (1 * cellWidth);
     			actualGoal.robotdir = Direction.DOWN;
     			break;
     		case UP:
     			actualGoal.getPoint().y -= (3 * cellWidth);
+    			actualGoal.getPoint().x += (1 * cellWidth);
     			actualGoal.robotdir = Direction.RIGHT;
     			break;
     		case DOWN:
     			actualGoal.getPoint().y += (3 * cellWidth);
+    			actualGoal.getPoint().x -= (1 * cellWidth);
     			actualGoal.robotdir = Direction.LEFT;
     			break;
     		}
