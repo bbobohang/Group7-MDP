@@ -39,7 +39,7 @@ direction_dict = {0: 'U', 2: 'R', 4: 'D', 6: 'L'}
 # print("===== Model loaded =====")
 
 # #Trained with good dataset with missing class, gray 2 times
-model = torch.hub.load('.', 'custom', path='best_gray_2_times_missing_class.pt', source='local')  
+model = torch.hub.load('.', 'custom', path='gray_3_v2.pt', source='local')  
 print("===== Model loaded =====")
 #---------------------------------------------------------------------------------
 
@@ -357,17 +357,17 @@ try:
     # while car_path:
     # if(os.path.exists(f"./detected_images_checklist/") == False):
     #     os.makedirs(f"./detected_images_checklist/")
-    # obstaclesString = s.recv(buffer).decode()
-    # obstaclesJson = json.loads(obstaclesString)
-    # headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-    # req = requests.post('http://localhost:8080/api', json=obstaclesJson)
-    # commands = req.json().get('commands')
-    # print(commands)
+    obstaclesString = s.recv(buffer).decode()
+    obstaclesJson = json.loads(obstaclesString)
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    req = requests.post('http://localhost:8080/api', json=obstaclesJson)
+    commands = req.json().get('commands')
+    print(commands)
 
-    commands = ["FW03","FRL-","FW01","SNAP5","FW06","SNAP1","FW04","FR90","FW07","SNAP3","FW07","FR90","FW02","SNAP2","FW08","SNAP4","FIN"]
+    # # commands = ["FW03","FRL-","FW01","SNAP5","FW06","SNAP1","FW04","FR90","FW07","SNAP3","FW07","FR90","FW02","SNAP2","FW08","SNAP4","FIN"]
     for command in commands:
-        time.sleep(5)
         print(command)
+        time.sleep(1)
         if "SNAP" in command:
             # time.sleep(2)
             id = command[len(command) - 1]
@@ -375,6 +375,7 @@ try:
 
             # Move forward 1 grid to snap 
             if captured == None:
+                print("moving forward")
                 #Move forward 1 grid
                 send_to_stm('FW01')
                 stm_movement_reply()
@@ -391,18 +392,8 @@ try:
         else:
             send_to_stm(command)
             stm_movement_reply()
-
-    
-    # send_to_stm("FL90")
-    # stm_movement_reply()        
-        
-        # while True:
-        #     captured = capture(expected, 1)
-        #     if captured.get("class") == "BULLEYE":
-        #         #move 90 degrees
-        #         continue
-        #     else:
-        #         break
+    print("Stitching images")
+    photo(expected)
   
     # while True:
     #     break

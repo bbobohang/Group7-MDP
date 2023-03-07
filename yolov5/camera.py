@@ -3,12 +3,22 @@ import cv2
 import torch
 import time
 import os 
+import socket
 
 image_dict = {'11': '1', '12': '2', '13': '3', '14': '4', '15': '5', '16': '6', '17': '7', '18': '8', '19': '9', "20": "A", "21":"B", "22": "C", "23": "D", "24": "E", "25":"F", "26": "G", "27": "H", "28": "S", "29": "T", "30": "U", "31": "V", "32": "W","33": "X", "34": "Y", "35": "Z", "36": "UP", "37" : "DOWN", "38": "RIGHT", "39": "LEFT", "40": "STOP"} 
 
-cap = cv2.VideoCapture(0)
-model = torch.hub.load('.', 'custom', path='best_gray_2_times_missing_class.pt', source='local')  # local repo
+# cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture()
+model = torch.hub.load('.', 'custom', path='gray_3_v1.pt', source='local')  # local repo
 print("===== Model loaded =====")
+
+host = "192.168.7.7"
+# host = "192.168.192.10"
+port = 12345
+buffer = 1024
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((host, port))
+print("Socket Connected")
 
 # def capture(turn):
 #     # time.sleep(5)
@@ -59,6 +69,7 @@ print("===== Model loaded =====")
 def capture():
     reply = {}
     THRESHOLD = 0.7
+    cap.open("http://192.168.7.7:5000/stream.mjpg")
 
     print("Capture function")
     
@@ -96,6 +107,8 @@ def capture():
         #     res.append(box)
         if box[4] > THRESHOLD:
             res.append(box)
+        else:
+            print("Box 4:" + str(box[4]))
 
     #Remove the bulleyes
     for i in range(len(res)):
@@ -129,8 +142,13 @@ def capture():
     x, y, w, h, conf, cls = int(x), int(y), int(w), int(h), round(conf, 2), image_dict.get(class_dict.get(int(cls)))
     print("Found: {}, {}, {}, {}, {}, {}".format(x, y, w, h, conf, cls))
 
+    if(os.path.exists(f"./detected_images/{str(cls)}") == False):
+            os.makedirs(f"./detected_images/{str(cls)}")
+
+    cv2.imwrite(f"./detected_images/{str(cls)}/conf{str(conf)}_width{w}_height{h}.png",
+                results.ims[0])
+
 count = 0
 while True:
     captured = capture()
-    count +=1
-    time.sleep(1)
+    time.sleep(3)

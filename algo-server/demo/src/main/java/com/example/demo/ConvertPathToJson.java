@@ -30,7 +30,7 @@ public class ConvertPathToJson {
 							pathNodes.get(i).robotdir == n.getActualGoal().robotdir) {
 						//if future change dir then add a forward or backward here first to snap depending on robotfacing and node,
 						list.add(pathNodes.get(i).robotdir == pathNodes.get(i).dir ? "FW" : "BW");
-						list.add("SNAP" + counter);
+						list.add("SNAP" + n.id);
 						counter++;
 						//n.setVisited(true);
 						break;
@@ -82,7 +82,7 @@ public class ConvertPathToJson {
 					//System.out.println("node XY: " + node.getXYPair() + ", n XY: " + n.getActualGoal().getXYPair());
 					if ( pathNodes.get(i).getXYPair().equals(n.getActualGoal().getXYPair()) &&
 							pathNodes.get(i).robotdir == n.getActualGoal().robotdir) {
-						list.add("SNAP" + counter);
+						list.add("SNAP" + n.id);
 						counter++;
 						//n.setVisited(true);
 						break;
@@ -98,7 +98,7 @@ public class ConvertPathToJson {
 		for (int i =0; i < list.size(); i++) {
 			if (list.get(i).toString().contains("SNAP")) {
 				if (list.get(i+1) == "FR90" || list.get(i+1) == "FL90") {
-					list.add(i+1, "BW");
+					//list.add(i+1, "BW");
 				}
 				//add if turn is BR90/FL90 == negative do forward
 			}
@@ -111,6 +111,16 @@ public class ConvertPathToJson {
 				list.remove(i);
 				list.remove(i);
 				list.add(i, "FLR");
+			}
+			if (list.get(i) == "BR90" && list.get(i+1) == "BL90") {
+				list.remove(i);
+				list.remove(i);
+				list.add(i, "BRL");
+			}
+			else if (list.get(i) == "BL90" && list.get(i+1) == "BR90") {
+				list.remove(i);
+				list.remove(i);
+				list.add(i, "BLR");
 			}
 			if (list.get(i) == "FR90" || list.get(i) == "FL90" || list.get(i) == "FRL" || list.get(i) == "FLR") {
 				if ((list.get(i+1) == "FW" || list.get(i+1) == "BW")) {
