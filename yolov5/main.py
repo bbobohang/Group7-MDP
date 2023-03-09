@@ -51,7 +51,8 @@ buffer = 1024
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((host, port))
 print("Socket Connected")
-print("Waiting for bluetooth to start...")
+print("Waiting for bluetooth to send arena...")
+
 
 # path = []
 # pillar_image = []
@@ -374,19 +375,36 @@ try:
     # while car_path:
     # if(os.path.exists(f"./detected_images_checklist/") == False):
     #     os.makedirs(f"./detected_images_checklist/")
-    # obstaclesString = s.recv(buffer).decode()
+    obstaclesString = s.recv(buffer).decode()
+    
+    socketAlgo = socket.socket()
+    hostAlgo = "192.168.7.9"
+    portAlgo = 6000
+    socketAlgo.connect((hostAlgo, portAlgo))
+
+    # string = """{"cat":"obstacles","obstacles":[{"x":1,"y":11,"id":1,"d":4},{"x":7,"y":7,"id":2,"d":4},{"x":15,"y":1,"id":3,"d":6},{"x":18,"y":9,"id":4,"d":6},{"x":14,"y":14,"id":5,"d":4},{"x":9,"y":17,"id":6,"d":6}],"mode":"0"}"""
+    x = obstaclesString.encode()
+    socketAlgo.sendall(x + "\n".encode())   
+    message = socketAlgo.recv(1024)
+    commands = json.loads(message.decode())
+    commands = commands.get("commands")
+    print(commands)
     # obstaclesJson = json.loads(obstaclesString)
     # headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
     # req = requests.post('http://localhost:8080/api', json=obstaclesJson)
     # commands = req.json().get('commands')
     # print(commands)
-    
-    commands = ["FW07","FR90","FW12","FL90","SNAP6","BW01","FL90","FW02","FR90","FW05","SNAP3","BW01","BL90","FW02","BW05","SNAP2","BW03","BR90","FW02","BR90","FW04","SNAP1","BW11","BR90","FW07","FLR-","FW02","SNAP4","BW01","FL90","FW01","FR90","FW03","SNAP5","FIN"]
+    print("Waiting to start task")
+    obstaclesString = s.recv(buffer).decode()
+
+    # commands = ["FR90","FW12","FL90","SNAP6","FW01","FR90","FW01","FL90","FW05","FL90","FR90","FW03","SNAP4","BW03","BL90","FW02","BW01","SNAP5","BW10","BR90","FW03","FR90","BW03","SNAP1","FW06","FR90","BL90","FW02","BW01","SNAP3","FW02","FL90","FW10","FL90","FW04","FR90","BW03","SNAP2","FIN"]
     for command in commands:
         print(command)
         time.sleep(0.5)
         if "SNAP" in command:
             # time.sleep(2)
+            # send_to_stm("RST-")
+            # stm_movement_reply()
             id = command[len(command) - 1]
             captured = capture(expected,id)
 

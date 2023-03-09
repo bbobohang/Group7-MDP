@@ -308,11 +308,8 @@ public class main extends JPanel {
 		 Object obj=JSONValue.parse(json);  
 		 JSONObject jsonObject = (JSONObject) obj;  
 		 System.out.println(jsonObject.get("cat"));
-		 System.out.println(jsonObject.get("value"));
-		 JSONObject value = (JSONObject) jsonObject.get("value");
-		 System.out.println(value.get("mode"));
 		 
-		 JSONArray obstaclesArr = (JSONArray) value.get("obstacles");
+		 JSONArray obstaclesArr = (JSONArray) jsonObject.get("obstacles");
          Iterator<JSONObject> iterator = obstaclesArr.iterator();
          while (iterator.hasNext()) {
         	 Node newNode = convertJsonToNode(iterator.next());

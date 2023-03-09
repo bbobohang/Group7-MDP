@@ -276,11 +276,27 @@ public class Node implements Cloneable {
             nodes.add(new Node(new Point(point.x - cellWidth, point.y + cellHeight), this.cellWidth, this.cellHeight));
             // T
             nodes.add(new Node(new Point(point.x, point.y + cellHeight), this.cellWidth, this.cellHeight));
-            	nodes.add(new Node(new Point(point.x, point.y + 2* cellHeight), this.cellWidth, this.cellHeight));
-            	nodes.add(new Node(new Point(point.x, point.y - 2* cellHeight), this.cellWidth, this.cellHeight));
-            	nodes.add(new Node(new Point(point.x + 2 *cellWidth, point.y), this.cellWidth, this.cellHeight));
-            	nodes.add(new Node(new Point(point.x - 2 * cellWidth, point.y), this.cellWidth, this.cellHeight));
-             
+            
+            // padding 2
+            //T
+            nodes.add(new Node(new Point(point.x, point.y + 2* cellHeight), this.cellWidth, this.cellHeight));
+            // D
+            nodes.add(new Node(new Point(point.x, point.y - 2* cellHeight), this.cellWidth, this.cellHeight));
+            // R
+            nodes.add(new Node(new Point(point.x + 2 *cellWidth, point.y), this.cellWidth, this.cellHeight));
+            // L
+            nodes.add(new Node(new Point(point.x - 2 * cellWidth, point.y), this.cellWidth, this.cellHeight));
+            
+            //padding 2 corners
+            //TL
+            nodes.add(new Node(new Point(point.x - 2 *cellWidth, point.y +2 * cellHeight), this.cellWidth, this.cellHeight));
+            // BL
+            nodes.add(new Node(new Point(point.x - 2 *cellWidth, point.y - 2 *cellHeight), this.cellWidth, this.cellHeight));
+            // BR
+            nodes.add(new Node(new Point(point.x + 2 *cellWidth, point.y - 2 *cellHeight), this.cellWidth, this.cellHeight));
+            // TR
+            nodes.add(new Node(new Point(point.x +2 * cellWidth, point.y + 2 *cellHeight), this.cellWidth, this.cellHeight));
+            
             return nodes;
         }
         
