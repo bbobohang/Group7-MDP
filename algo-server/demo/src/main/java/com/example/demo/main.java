@@ -372,18 +372,18 @@ public class main extends JPanel {
 			open = new HashSet<Node>();
 		}
 	final Node copiedNode = startNode;
-//	drawPathAlgo(copiedNode);
-//
-//		simulator = new Thread(() -> {
-//
-//		try {
-//			drawPath(copiedNode);
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	});
-//		simulator.start();
+	drawPathAlgo(copiedNode);
+
+		simulator = new Thread(() -> {
+
+		try {
+			drawPath(copiedNode);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	});
+		simulator.start();
 		return copiedNode;
 		
 	}
@@ -401,10 +401,10 @@ public class main extends JPanel {
 //		closed.add(new Node(new Point(75, 425), cellWidth, cellHeight));
 //		closed.add(new Node(new Point(75, 450), cellWidth, cellHeight));
 //		closed.add(new Node(new Point(75, 475), cellWidth, cellHeight));
-//		closed.add(new Node(new Point(50, 400), cellWidth, cellHeight));
-//		closed.add(new Node(new Point(50, 425), cellWidth, cellHeight));
-//		closed.add(new Node(new Point(50, 450), cellWidth, cellHeight));
-//		closed.add(new Node(new Point(50, 475), cellWidth, cellHeight));
+		//closed.add(new Node(new Point(50, 400), cellWidth, cellHeight));
+		//closed.add(new Node(new Point(50, 425), cellWidth, cellHeight));
+		closed.add(new Node(new Point(50, 450), cellWidth, cellHeight));
+		closed.add(new Node(new Point(50, 475), cellWidth, cellHeight));
 		while (!open.isEmpty()) {
 			Map<Node, Double> costs = new HashMap<Node, Double>();
 			for (Node node : open) {
@@ -421,7 +421,7 @@ public class main extends JPanel {
 			Node currentNodeWithDir = current.clone();
 			closed.add(currentNodeWithDir);
 			for (Node oneObs : obstacles.values() ) {
-				for (Node n : oneObs.getSurroundingNodes()) {
+				for (Node n : oneObs.getSurroundingNodes(oneObs)) {
 					closed.add(n);
 				}
 			}

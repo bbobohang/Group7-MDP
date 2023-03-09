@@ -9,7 +9,7 @@ image_dict = {'11': '1', '12': '2', '13': '3', '14': '4', '15': '5', '16': '6', 
 
 # cap = cv2.VideoCapture(0)
 cap = cv2.VideoCapture()
-model = torch.hub.load('.', 'custom', path='gray_3_v1.pt', source='local')  # local repo
+model = torch.hub.load('.', 'custom', path='gray_3_v3.pt', source='local')  # local repo
 print("===== Model loaded =====")
 
 host = "192.168.7.7"

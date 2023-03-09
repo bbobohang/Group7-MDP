@@ -257,7 +257,7 @@ public class Node implements Cloneable {
     		return actualGoal;
     	}
         
-        public List<Node> getSurroundingNodes() {
+        public List<Node> getSurroundingNodes(Node x) {
 
             List<Node> nodes = new LinkedList<Node>();
             // TR
@@ -276,7 +276,11 @@ public class Node implements Cloneable {
             nodes.add(new Node(new Point(point.x - cellWidth, point.y + cellHeight), this.cellWidth, this.cellHeight));
             // T
             nodes.add(new Node(new Point(point.x, point.y + cellHeight), this.cellWidth, this.cellHeight));
-            
+            	nodes.add(new Node(new Point(point.x, point.y + 2* cellHeight), this.cellWidth, this.cellHeight));
+            	nodes.add(new Node(new Point(point.x, point.y - 2* cellHeight), this.cellWidth, this.cellHeight));
+            	nodes.add(new Node(new Point(point.x + 2 *cellWidth, point.y), this.cellWidth, this.cellHeight));
+            	nodes.add(new Node(new Point(point.x - 2 * cellWidth, point.y), this.cellWidth, this.cellHeight));
+             
             return nodes;
         }
         

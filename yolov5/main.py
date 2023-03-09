@@ -39,7 +39,7 @@ direction_dict = {0: 'U', 2: 'R', 4: 'D', 6: 'L'}
 # print("===== Model loaded =====")
 
 # #Trained with good dataset with missing class, gray 2 times
-model = torch.hub.load('.', 'custom', path='gray_3_v2.pt', source='local')  
+model = torch.hub.load('.', 'custom', path='gray_3_v3.pt', source='local')  
 print("===== Model loaded =====")
 #---------------------------------------------------------------------------------
 
@@ -168,7 +168,7 @@ def capture(expected, id):
     x, y, w, h, conf, cls_num = biggest_box
     cls = str(int(cls_num))
 
-    x, y, w, h, conf, cls = int(x), int(y), int(w), int(h), round(conf, 2), image_dict.get(class_dict.get(int(cls)))
+    x, y, w, h, conf, cls = int(x), int(y), int(w), int(h), round(conf, 2), class_dict.get(int(cls))
     print("Found: {}, {}, {}, {}, {}, {}".format(x, y, w, h, conf, cls))
     
     #Send image capture to Bluetooth
@@ -343,6 +343,23 @@ def correction(diff):
     # +- 182 = > 11.5cm
     # +- 217 = > 15cm
 
+def move_forward(expected,id):
+    print("moving forward")
+    send_to_stm('FW01')
+    stm_movement_reply()
+    captured = capture(expected,id)
+    send_to_stm('BW01')
+    stm_movement_reply()
+    return captured
+
+def move_backward(expected, id):
+    print("moving backward")
+    send_to_stm('BW01')
+    stm_movement_reply()
+    captured = capture(expected,id)
+    send_to_stm('FW01')
+    stm_movement_reply()
+    return captured
 
 # Main logic
 expected = {}
@@ -357,17 +374,17 @@ try:
     # while car_path:
     # if(os.path.exists(f"./detected_images_checklist/") == False):
     #     os.makedirs(f"./detected_images_checklist/")
-    obstaclesString = s.recv(buffer).decode()
-    obstaclesJson = json.loads(obstaclesString)
-    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-    req = requests.post('http://localhost:8080/api', json=obstaclesJson)
-    commands = req.json().get('commands')
-    print(commands)
-
-    # # commands = ["FW03","FRL-","FW01","SNAP5","FW06","SNAP1","FW04","FR90","FW07","SNAP3","FW07","FR90","FW02","SNAP2","FW08","SNAP4","FIN"]
+    # obstaclesString = s.recv(buffer).decode()
+    # obstaclesJson = json.loads(obstaclesString)
+    # headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    # req = requests.post('http://localhost:8080/api', json=obstaclesJson)
+    # commands = req.json().get('commands')
+    # print(commands)
+    
+    commands = ["FW07","FR90","FW12","FL90","SNAP6","BW01","FL90","FW02","FR90","FW05","SNAP3","BW01","BL90","FW02","BW05","SNAP2","BW03","BR90","FW02","BR90","FW04","SNAP1","BW11","BR90","FW07","FLR-","FW02","SNAP4","BW01","FL90","FW01","FR90","FW03","SNAP5","FIN"]
     for command in commands:
         print(command)
-        time.sleep(1)
+        time.sleep(0.5)
         if "SNAP" in command:
             # time.sleep(2)
             id = command[len(command) - 1]
@@ -375,15 +392,11 @@ try:
 
             # Move forward 1 grid to snap 
             if captured == None:
-                print("moving forward")
-                #Move forward 1 grid
-                send_to_stm('FW01')
-                stm_movement_reply()
-                captured = capture(expected,id)
-                send_to_stm('BW01')
-                stm_movement_reply()
+                captured = move_forward(expected,id)
                 if captured == None:
-                    print("Gone obstacles")
+                    captured = move_backward(expected,id)
+                    if captured == None:
+                        print("Gone obstacle")
             else:
                 print("Found this: " + captured.get("class"))
         elif command == "FIN":

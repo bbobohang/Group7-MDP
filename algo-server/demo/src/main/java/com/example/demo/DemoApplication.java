@@ -32,7 +32,27 @@ public class DemoApplication {
 //		
 //		String outputjson = test.findPathJson(json);
 //		
-		SpringApplication.run(DemoApplication.class, args);
+		String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":["
+			    + "{\"x\":1,\"y\":18,\"id\":1,\"d\":4},"
+			    + "{\"x\":6,\"y\":12,\"id\":2,\"d\":0},"
+			    + "{\"x\":14,\"y\":16,\"id\":3,\"d\":6},"
+			    + "{\"x\":10,\"y\":6,\"id\":4,\"d\":2},"
+			    + "{\"x\":13,\"y\":2,\"id\":5,\"d\":2},"
+			    + "{\"x\":18,\"y\":9,\"id\":6,\"d\":6},"
+			    + "],\"mode\":\"0\"}}";
+		
+//		String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":["
+//			    + "{\"x\":5,\"y\":3,\"id\":1,\"d\":0},"
+//			    + "{\"x\":2,\"y\":9,\"id\":2,\"d\":0},"
+//			    + "{\"x\":13,\"y\":8,\"id\":3,\"d\":4},"
+//			    + "{\"x\":11,\"y\":14,\"id\":4,\"d\":6},"
+//			    + "{\"x\":2,\"y\":17,\"id\":5,\"d\":2},"
+//			    + "{\"x\":16,\"y\":17,\"id\":6,\"d\":2},"
+//			    + "],\"mode\":\"0\"}}";
+		main test = new main();
+		test.createGUI();
+		test.findPathJson(json);
+//		SpringApplication.run(DemoApplication.class, args);
 		
 	}
 
