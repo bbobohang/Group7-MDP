@@ -9,8 +9,30 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.io.*;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 public class Server {
+	public static void writeToFile(String message) throws IOException {
+		
+		JSONObject jsonObject = (JSONObject) JSONValue.parse(message);  
+		 
+		JSONArray obstaclesArr = (JSONArray) jsonObject.get("obstacles");
+		
+		
+		LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+        String formattedDateTime = now.format(formatter);
+        String fileName = formattedDateTime + ".txt";
+        File file = new File(fileName);
+        file.createNewFile();
+        FileWriter fw = new FileWriter(file.getAbsoluteFile());
+        BufferedWriter bw = new BufferedWriter(fw);
+        bw.write(message + "\n");
+        bw.write("\n" + obstaclesArr.toString().replace('"', '\"'));
+        bw.close();
+	}
+	
 	public static void main(String[] args) throws IOException {
 	      try {
 	       ServerSocket serversocket = new ServerSocket(6000);
@@ -24,8 +46,10 @@ public class Server {
 	 
 	        String message = input.readLine(); // changed
 	        System.out.println(message);
+	        writeToFile(message);
+	        test.createGUI();
 	        String x = test.findPathJson(message);
-	              output.write(x.getBytes(StandardCharsets.UTF_8)); // changed
+	        output.write(x.getBytes(StandardCharsets.UTF_8)); // changed
 	 
 	       //client.close();
 	       //serversocket.close();
@@ -37,6 +61,6 @@ public class Server {
 	 //   // TODO Auto-generated catch block
 	 //   e.printStackTrace();
 	 //  }
-	         System.exit(0);
+	       //System.exit(0);
 	     }
 }

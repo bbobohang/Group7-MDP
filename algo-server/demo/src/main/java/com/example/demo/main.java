@@ -6,7 +6,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -306,9 +305,7 @@ public class main extends JPanel {
 	@SuppressWarnings("unchecked")
 	public String findPathJson(String json) {
 		 Object obj=JSONValue.parse(json);  
-		 JSONObject jsonObject = (JSONObject) obj;  
-		 System.out.println(jsonObject.get("cat"));
-		 
+		 JSONObject jsonObject = (JSONObject) obj; 
 		 JSONArray obstaclesArr = (JSONArray) jsonObject.get("obstacles");
          Iterator<JSONObject> iterator = obstaclesArr.iterator();
          while (iterator.hasNext()) {
@@ -349,12 +346,30 @@ public class main extends JPanel {
 		startTime = System.nanoTime();
 		// have to copy to a new var, cant just use obstacle.values as it is being used
 		// to draw the nodes
-		Collection<Node> nodes = new HashSet<Node>(obstacles.values().size());
+		ArrayList<Node> nodes = new ArrayList<Node>();
 		Iterator<Node> iterator = obstacles.values().iterator();
 		while (iterator.hasNext()) {
 			nodes.add(iterator.next().clone());
 		}
 		Node startNode = start;
+//		int[] order = {2,3,1,4,5,6};
+//		for (int i = 0; i < order.length; i++) {
+//			// find node == id
+//			Node end = null;
+//			for (Node b : nodes) {
+//				if (b.id == order[i]) end = b;
+//			}
+//			//nodes2.remove(i);
+//			try {
+//				closed = new HashSet<Node>();
+//				startNode = findPathStartToEndNode(startNode, end);
+//			}
+//			catch (InterruptedException ex) {
+//				ex.printStackTrace();
+//			} 
+//			open = new HashSet<Node>();
+//		}
+//		
 		while (!nodes.isEmpty()) {
 			Node end = startNode.getNearest(nodes);
 			//System.out.println(end.robotdir);
@@ -462,7 +477,7 @@ public class main extends JPanel {
 		}
 		updateTime();
 		repaint();
-		Thread.sleep(500);
+		Thread.sleep(200);
 		
 	}	
 	
@@ -494,11 +509,11 @@ public class main extends JPanel {
 				pathNodes.add(0, current);
 				current = current.getParent();
 			}
-			ConvertPathToJson.getJsonPath(pathNodes, obstacles.values());
+			//ConvertPathToJson.getJsonPath(pathNodes, obstacles.values());
 			for (Node n : pathNodes) {
 				try {
 					updateMovement(n);
-					System.out.println(n.getXYPair() + ",RobotFacing:" + n.robotdir + ",RobotNode:" + n.getDirection());
+					//System.out.println(n.getXYPair() + ",RobotFacing:" + n.robotdir + ",RobotNode:" + n.getDirection());
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -514,6 +529,7 @@ public class main extends JPanel {
 			g.setColor(Color.BLACK);
 			g.fillRect(obs.getPoint().x, obs.getPoint().y, cellWidth, cellHeight);
 			int heightOfImage = cellWidth / 4;
+			g.drawString(Integer.toString(obs.id), obs.getPoint().x, obs.getPoint().y);
 
 			if (obs.visited)
 				g.setColor(Color.decode("#a5be002"));
@@ -539,7 +555,6 @@ public class main extends JPanel {
 		for (Map.Entry<Point, Color> tile : tiles.entrySet()) {
 			tool.setColor(tile.getValue());
 			tool.fillRect(tile.getKey().x, tile.getKey().y, cellWidth, cellHeight);
-			tool.drawString("a", tile.getKey().x, tile.getKey().y);
 		}
 		// start area
 		//drawStartingGrid(tool);
@@ -756,17 +771,27 @@ public class main extends JPanel {
 		resetPath();
 		return outputjson;
 	}
-//	public static void main(String[] args) {
-//		main simulator = new main();
-//		//String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"x\":3,\"y\":15,\"id\":1,\"d\":4},{\"x\":16,\"y\":18,\"id\":2,\"d\":2},{\"x\":14,\"y\":11,\"id\":3,\"d\":4},{\"x\":7,\"y\":6,\"id\":4,\"d\":2},{\"x\":17,\"y\":6,\"id\":5,\"d\":0},{\"x\":8,\"y\":15,\"id\":6,\"d\":6}],\"mode\":\"0\"}}";
-//		//String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"x\":3,\"y\":6,\"id\":2,\"d\":6},{\"x\":5,\"y\":9,\"id\":0,\"d\":4}, {\"x\":12,\"y\":12,\"id\":2,\"d\":4} ],\"mode\":\"0\"}}";
-//		//String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"x\":3,\"y\":6,\"id\":2,\"d\":6},{\"x\":5,\"y\":9,\"id\":0,\"d\":4}, {\"x\":10,\"y\":16,\"id\":2,\"d\":0}, {\"x\":16,\"y\":9,\"id\":6,\"d\":2}, {\"x\":12,\"y\":12,\"id\":2,\"d\":4} ],\"mode\":\"0\"}}";
-//		//String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"d\":6,\"x\":5,\"y\":13,\"id\":2},{\"d\":4,\"x\":15,\"y\":15,\"id\":0},{\"d\":,\"x\":15,\"y\":4,\"id\":2},{\"d\":2,\"x\":12,\"y\":9,\"id\":2},{\"d\":4,\"x\":5,\"y\":7,\"id\":2}],\"mode\":\"0\"}}";
-//		//String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"d\":6,\"x\":5,\"y\":13,\"id\":2},{\"d\":2,\"x\":15,\"y\":15,\"id\":0}, {\"d\":0,\"x\":10,\"y\":15,\"id\":0}, {\"d\":2,\"x\":15,\"y\":7,\"id\":2},{\"d\":6,\"x\":5,\"y\":7,\"id\":2}],\"mode\":\"0\"}}";
-//		String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"x\":5,\"y\":13,\"id\":1,\"d\":6},{\"x\":15,\"y\":15,\"id\":2,\"d\":2},{\"x\":10,\"y\":15,\"id\":3,\"d\":0},{\"x\":5,\"y\":7,\"id\":5,\"d\":6},{\"x\":15,\"y\":7,\"id\":4,\"d\":2}],\"mode\":\"0\"}}";
-//		
-//		//String json = "{\"cat\":\"obstacles\",\"obstacles\":[{\"x\":5,\"y\":13,\"id\":1,\"d\":6},{\"x\":15,\"y\":15,\"id\":2,\"d\":2},{\"x\":10,\"y\":15,\"id\":3,\"d\":0},{\"x\":5,\"y\":7,\"id\":5,\"d\":6},{\"x\":15,\"y\":7,\"id\":4,\"d\":2}],\"mode\":\"0\"}";
-//		String outputjson = simulator.findPathJson(json);
-//	}
+	public static void main(String[] args) {
+		main simulator = new main();
+		//String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"x\":3,\"y\":15,\"id\":1,\"d\":4},{\"x\":16,\"y\":18,\"id\":2,\"d\":2},{\"x\":14,\"y\":11,\"id\":3,\"d\":4},{\"x\":7,\"y\":6,\"id\":4,\"d\":2},{\"x\":17,\"y\":6,\"id\":5,\"d\":0},{\"x\":8,\"y\":15,\"id\":6,\"d\":6}],\"mode\":\"0\"}}";
+		//String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"x\":3,\"y\":6,\"id\":2,\"d\":6},{\"x\":5,\"y\":9,\"id\":0,\"d\":4}, {\"x\":12,\"y\":12,\"id\":2,\"d\":4} ],\"mode\":\"0\"}}";
+		//String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"x\":3,\"y\":6,\"id\":2,\"d\":6},{\"x\":5,\"y\":9,\"id\":0,\"d\":4}, {\"x\":10,\"y\":16,\"id\":2,\"d\":0}, {\"x\":16,\"y\":9,\"id\":6,\"d\":2}, {\"x\":12,\"y\":12,\"id\":2,\"d\":4} ],\"mode\":\"0\"}}";
+		//String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"d\":6,\"x\":5,\"y\":13,\"id\":2},{\"d\":4,\"x\":15,\"y\":15,\"id\":0},{\"d\":,\"x\":15,\"y\":4,\"id\":2},{\"d\":2,\"x\":12,\"y\":9,\"id\":2},{\"d\":4,\"x\":5,\"y\":7,\"id\":2}],\"mode\":\"0\"}}";
+		//String json = "{\"cat\":\"obstacles\",\"value\":{\"obstacles\":[{\"d\":6,\"x\":5,\"y\":13,\"id\":2},{\"d\":2,\"x\":15,\"y\":15,\"id\":0}, {\"d\":0,\"x\":10,\"y\":15,\"id\":0}, {\"d\":2,\"x\":15,\"y\":7,\"id\":2},{\"d\":6,\"x\":5,\"y\":7,\"id\":2}],\"mode\":\"0\"}}";
+		//String json = "{\"obstacles\":[{\"d\":4,\"x\":1,\"y\":8,\"id\":1},{\"d\":4,\"x\":1,\"y\":18,\"id\":2},{\"d\":0,\"x\":6,\"y\":12,\"id\":3},{\"d\":0,\"x\":10,\"y\":6,\"id\":4},{\"d\":6,\"x\":13,\"y\":2,\"id\":5},{\"d\":6,\"x\":14,\"y\":16,\"id\":6}]}";
+		String json = "{\"cat\":\"obstacles\",\"obstacles\":["
+			    + "{\"x\":1,\"y\":18,\"id\":1,\"d\":4},"
+			    + "{\"x\":6,\"y\":12,\"id\":2,\"d\":0},"
+			    + "{\"x\":14,\"y\":16,\"id\":3,\"d\":6},"
+			    + "{\"x\":10,\"y\":6,\"id\":4,\"d\":2},"
+			    + "{\"x\":13,\"y\":2,\"id\":5,\"d\":2},"
+			    + "{\"x\":18,\"y\":9,\"id\":6,\"d\":6}]"
+			    + "\"mode\":\"0\"}";
+		
+		simulator.createGUI();
+		//String json = "{\"cat\":\"obstacles\",\"obstacles\":[{\"x\":5,\"y\":13,\"id\":1,\"d\":6},{\"x\":15,\"y\":15,\"id\":2,\"d\":2},{\"x\":10,\"y\":15,\"id\":3,\"d\":0},{\"x\":5,\"y\":7,\"id\":5,\"d\":6},{\"x\":15,\"y\":7,\"id\":4,\"d\":2}],\"mode\":\"0\"}";
+		String outputjson = simulator.findPathJson(json);
+	}
+	
 
 }

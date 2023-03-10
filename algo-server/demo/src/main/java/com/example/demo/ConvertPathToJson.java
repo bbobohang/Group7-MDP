@@ -101,7 +101,7 @@ public class ConvertPathToJson {
         }
 
 		list.add("FIN");
-		System.out.println("ORIGINAL" + list);
+		//System.out.println("ORIGINAL" + list);
 		for (int i =0; i < list.size(); i++) {
 			if (list.get(i).toString().contains("SNAP")) {
 				if (list.get(i+1) == "FR90" || list.get(i+1) == "FL90") {
@@ -144,7 +144,7 @@ public class ConvertPathToJson {
 			}
 			}
 		}
-		System.out.println("EDIT 1" + list);
+		//System.out.println("EDIT 1" + list);
 		int noTracker = 1;
 		String prevcommand = "";
 		String command = "";

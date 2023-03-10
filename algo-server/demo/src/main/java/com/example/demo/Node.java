@@ -278,7 +278,7 @@ public class Node implements Cloneable {
             nodes.add(new Node(new Point(point.x, point.y + cellHeight), this.cellWidth, this.cellHeight));
             
             // padding 2
-            //T
+            // T
             nodes.add(new Node(new Point(point.x, point.y + 2* cellHeight), this.cellWidth, this.cellHeight));
             // D
             nodes.add(new Node(new Point(point.x, point.y - 2* cellHeight), this.cellWidth, this.cellHeight));
@@ -296,6 +296,27 @@ public class Node implements Cloneable {
             nodes.add(new Node(new Point(point.x + 2 *cellWidth, point.y - 2 *cellHeight), this.cellWidth, this.cellHeight));
             // TR
             nodes.add(new Node(new Point(point.x +2 * cellWidth, point.y + 2 *cellHeight), this.cellWidth, this.cellHeight));
+            
+            // padding 2 corners additional
+            // between T and L
+            nodes.add(new Node(new Point(point.x - 1 *cellWidth, point.y +2 * cellHeight), this.cellWidth, this.cellHeight));
+            // between B and L
+            nodes.add(new Node(new Point(point.x - 1 *cellWidth, point.y - 2 *cellHeight), this.cellWidth, this.cellHeight));
+            // between B and R
+            nodes.add(new Node(new Point(point.x + 1 *cellWidth, point.y - 2 *cellHeight), this.cellWidth, this.cellHeight));
+            //between T and R
+            nodes.add(new Node(new Point(point.x + 1 * cellWidth, point.y + 2 *cellHeight), this.cellWidth, this.cellHeight));
+            
+            // middle T and L
+            nodes.add(new Node(new Point(point.x - 2 *cellWidth, point.y + 1 * cellHeight), this.cellWidth, this.cellHeight));
+            // middle B and L
+            nodes.add(new Node(new Point(point.x - 2 * cellWidth, point.y - 1 *cellHeight), this.cellWidth, this.cellHeight));
+            // between B and R
+            nodes.add(new Node(new Point(point.x + 2 *cellWidth, point.y - 1 *cellHeight), this.cellWidth, this.cellHeight));
+            //between T and R
+            nodes.add(new Node(new Point(point.x + 2 * cellWidth, point.y + 1 *cellHeight), this.cellWidth, this.cellHeight));
+            
+            
             
             return nodes;
         }
