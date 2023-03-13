@@ -22,26 +22,7 @@ image_dict = {'11': '1', '12': '2', '13': '3', '14': '4', '15': '5', '16': '6', 
 direction_dict = {0: 'U', 2: 'R', 4: 'D', 6: 'L'}
 
 # Getting the images from RPI------------------------------------------------------
-#Original dataset
-# model = torch.hub.load('.', 'custom', path='best.pt', source='local')  # local repo
-# print("===== Model loaded =====")
-
-# #Low accuracy for 7,Z,H,C,T,4
-# #Trained with good dataset, grayscaled 3 times
-# model = torch.hub.load('.', 'custom', path='best_good_gray.pt', source='local')  
-# print("===== Model loaded =====")
-
-# #Trained with poor dataset, grayscaled
-# model = torch.hub.load('.', 'custom', path='best_good_gray.pt', source='local')  
-# print("===== Model loaded =====")
-
-# #Trained with good dataset, colored 2 times
-# #Low accuracy for 7,4,T,F
-# model = torch.hub.load('.', 'custom', path='best_color_2.pt', source='local')  
-# print("===== Model loaded =====")
-
-# #Trained with good dataset with missing class, gray 2 times
-model = torch.hub.load('.', 'custom', path='gray_3_v3.pt', source='local')  
+model = torch.hub.load('.', 'custom', path='best.pt', source='local')  
 print("===== Model loaded =====")
 #---------------------------------------------------------------------------------
 
