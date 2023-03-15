@@ -22,7 +22,7 @@ image_dict = {'11': '1', '12': '2', '13': '3', '14': '4', '15': '5', '16': '6', 
 direction_dict = {0: 'U', 2: 'R', 4: 'D', 6: 'L'}
 
 # Getting the images from RPI------------------------------------------------------
-model = torch.hub.load('.', 'custom', path='best.pt', source='local')  
+model = torch.hub.load('.', 'custom', path='best_v3.pt', source='local')  
 print("===== Model loaded =====")
 #---------------------------------------------------------------------------------
 
@@ -79,7 +79,7 @@ cap = cv2.VideoCapture()
 # cap.open("http://192.168.192.10:5000/stream.mjpg")
 
 # take image, recognize and store it.
-def capture(expected, id):
+def capture(expected):
     reply = {}
     THRESHOLD = 0.7
 
@@ -89,8 +89,8 @@ def capture(expected, id):
     cap.open("http://192.168.7.7:5000/stream.mjpg")
     ret, image = cap.read()
     
-    img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    img_gray = cv2.resize(img_gray, (640, 640))
+    # img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    img_gray = cv2.resize(image, (640, 640))
 
     # recognition
     results = model(img_gray)
@@ -155,10 +155,10 @@ def capture(expected, id):
     x, y, w, h, conf, cls = int(x), int(y), int(w), int(h), round(conf, 2), class_dict.get(int(cls))
     print("Found: {}, {}, {}, {}, {}, {}".format(x, y, w, h, conf, cls))
     
-    #Send image capture to Bluetooth
-    msg_img = "AN|" + "TARGET," + id + ","+ cls
-    s.send(msg_img.encode())
-    time.sleep(0.5)
+    # #Send image capture to Bluetooth
+    # msg_img = "AN|" + "TARGET," + id + ","+ cls
+    # s.send(msg_img.encode())
+    # time.sleep(0.5)
 
 #     """how much is the median_detected off from the median_landscape; l is negative, r is positive"""
     median_landscape = 640 / 2
@@ -318,7 +318,11 @@ def correction(diff):
             return 'n100'
     else:
         return None
-
+def send_us():
+    print("Asking for distance")
+    msg = "US|dist"
+    s.send(msg.encode())
+    return
     # n100 182
     # +- 50 = > 3cm
     # +- 69 = > 5cm
@@ -329,8 +333,17 @@ def correction(diff):
 # Main logic
 expected = {}
 try:
-    obstaclesString = s.recv(buffer).decode()
-    print("Starting task")
+    while True:
+        send_us()
+        msg = s.recv(buffer).decode()
+        print(msg)
+        msg = round(float(msg))
+        
+        captured = capture(expected)
+        time.sleep(3)
+
+
+
         
 except Exception as e:
     print("*ERROR*")
