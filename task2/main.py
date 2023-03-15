@@ -34,7 +34,6 @@ buffer = 1024
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((host, port))
 print("Socket Connected")
-print("Waiting for bluetooth to send arena...")
 
 
 # path = []
@@ -333,14 +332,58 @@ def send_us():
 # Main logic
 expected = {}
 try:
-    while True:
-        send_us()
-        msg = s.recv(buffer).decode()
-        print(msg)
-        msg = round(float(msg))
-        
-        captured = capture(expected)
-        time.sleep(3)
+    #Await for bluetooth start
+    print("Waiting for bluetooth to send arena...")
+    start = s.recv(buffer).decode()
+
+    #Start US to get distance
+    print("Starting first obstacle")
+    send_us()
+    distance = s.recv(buffer).decode()
+    distance = round(float(distance))
+    print("Obstacle at:", str(distance))
+
+    #Send to stm distance to move to first obstacle and wait for reply
+    distance = distance - 30
+    send_to_stm(str(distance))
+    stm_movement_reply()
+
+    #Snap photo
+    captured = capture(expected)
+    if(captured.get('class') == None):
+        print("No image detected")
+    elif (str(captured.get('class')) == "38"):
+        #Call stm right command
+        send_to_stm("first obstacle command right")
+    else:
+        #Call stm left command
+        send_to_stm("first obstacle command left")
+    stm_movement_reply()
+
+#------------------------------------------------------------------
+    #Start US to get distance
+    print("Starting second obstacle")
+    send_us()
+    distance = s.recv(buffer).decode()
+    distance = round(float(distance))
+    print("Obstacle at:", str(distance))
+
+    #Send to stm distance to move to second obstacle and wait for reply
+    distance = distance - 30
+    send_to_stm(str(distance))
+    stm_movement_reply()
+
+    #Snap photo
+    captured = capture(expected)
+    if(captured.get('class') == None):
+        print("No image detected")
+    elif (str(captured.get('class')) == "38"):
+        #Call stm right command
+        send_to_stm("first obstacle command right")
+    else:
+        #Call stm left command
+        send_to_stm("first obstacle command left")
+    stm_movement_reply()
 
 
 
