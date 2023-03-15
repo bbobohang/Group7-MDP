@@ -9,7 +9,7 @@ image_dict = {'11': '1', '12': '2', '13': '3', '14': '4', '15': '5', '16': '6', 
 
 # cap = cv2.VideoCapture(0)
 cap = cv2.VideoCapture()
-model = torch.hub.load('.', 'custom', path='best.pt', source='local')  # local repo
+model = torch.hub.load('.', 'custom', path='best_v3.pt', source='local')  # local repo
 print("===== Model loaded =====")
 
 host = "192.168.7.7"
@@ -68,7 +68,7 @@ print("Socket Connected")
     
 def capture():
     reply = {}
-    THRESHOLD = 0.7
+    THRESHOLD = 0.5
     cap.open("http://192.168.7.7:5000/stream.mjpg")
 
     print("Capture function")
@@ -76,11 +76,11 @@ def capture():
     """Capture the last image from cv2.videocapture()"""
     ret, image = cap.read()
     
-    img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    img_gray = cv2.resize(img_gray, (640, 640))
+    # img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # img_gray = cv2.resize(image, (640, 640))
 
     # recognition
-    results = model(img_gray)
+    results = model(image)
     results.render()
 
     """Class Dict"""
