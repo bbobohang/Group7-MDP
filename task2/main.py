@@ -20,6 +20,7 @@ from PIL import Image
 #  config
 image_dict = {'11': '1', '12': '2', '13': '3', '14': '4', '15': '5', '16': '6', '17': '7', '18': '8', '19': '9', "20": "A", "21":"B", "22": "C", "23": "D", "24": "E", "25":"F", "26": "G", "27": "H", "28": "S", "29": "T", "30": "U", "31": "V", "32": "W","33": "X", "34": "Y", "35": "Z", "36": "UP", "37" : "DOWN", "38": "RIGHT", "39": "LEFT", "40": "STOP"} 
 direction_dict = {0: 'U', 2: 'R', 4: 'D', 6: 'L'}
+FIXED_DIST = 30
 
 # Getting the images from RPI------------------------------------------------------
 model = torch.hub.load('.', 'custom', path='best_v3.pt', source='local')  
@@ -273,6 +274,7 @@ def compress(input):
 
 def send_to_stm(command):
     res = "STM|" + command
+    print(res)
     s.send(res.encode())
     # msg = s.recv(buffer).decode()
     return
@@ -334,18 +336,26 @@ expected = {}
 try:
     #Await for bluetooth start
     print("Waiting for bluetooth to send arena...")
-    start = s.recv(buffer).decode()
+    # start = s.recv(buffer).decode()
+    text = input("Enter to start:")
 
     #Start US to get distance
     print("Starting first obstacle")
     send_us()
-    distance = s.recv(buffer).decode()
-    distance = round(float(distance))
-    print("Obstacle at:", str(distance))
+    first_dist = s.recv(buffer).decode()
+    first_dist = round(float(first_dist))
+    print("Obstacle at:", str(first_dist))
 
     #Send to stm distance to move to first obstacle and wait for reply
-    distance = distance - 30
-    send_to_stm(str(distance))
+    #If too close, move back
+    new_distance = abs(first_dist - FIXED_DIST)
+    str_new_distance = str(new_distance)
+    str_new_distance = str_new_distance.zfill(3)
+    if(first_dist < FIXED_DIST):
+        message = "BW" + str(str_new_distance)
+    else:
+        message = "FW" + str(str_new_distance)
+    send_to_stm(message)
     stm_movement_reply()
 
     #Snap photo
@@ -354,23 +364,35 @@ try:
         print("No image detected")
     elif (str(captured.get('class')) == "38"):
         #Call stm right command
-        send_to_stm("first obstacle command right")
+        send_to_stm("OR001")
+        stm_movement_reply()
+
     else:
         #Call stm left command
-        send_to_stm("first obstacle command left")
-    stm_movement_reply()
+        send_to_stm("OL001")
+        stm_movement_reply()
+
 
 #------------------------------------------------------------------
+    time.sleep(5)
     #Start US to get distance
     print("Starting second obstacle")
     send_us()
-    distance = s.recv(buffer).decode()
-    distance = round(float(distance))
-    print("Obstacle at:", str(distance))
-
-    #Send to stm distance to move to second obstacle and wait for reply
-    distance = distance - 30
-    send_to_stm(str(distance))
+    second_dist = s.recv(buffer).decode()
+    second_dist = round(float(second_dist))
+    print("Obstacle at:", str(second_dist))
+    
+    #Send to stm distance to move to first obstacle and wait for reply
+    #If too close, move back
+    #TODO :fixed the message sent
+    new_distance = abs(second_dist - FIXED_DIST)
+    str_new_distance = str(new_distance)
+    str_new_distance = str_new_distance.zfill(3)
+    if(second_dist < FIXED_DIST):
+        message = "BW" + str(str_new_distance)
+    else:
+        message = "FW" + str(str_new_distance)
+    send_to_stm(message)
     stm_movement_reply()
 
     #Snap photo
@@ -379,11 +401,15 @@ try:
         print("No image detected")
     elif (str(captured.get('class')) == "38"):
         #Call stm right command
-        send_to_stm("first obstacle command right")
+        send_to_stm("OR002")
+        stm_movement_reply()
     else:
         #Call stm left command
-        send_to_stm("first obstacle command left")
-    stm_movement_reply()
+        send_to_stm("OL002")
+        stm_movement_reply()
+    
+    #Calculate distance to 10cm infront of 1st obstacle
+
 
 
 
