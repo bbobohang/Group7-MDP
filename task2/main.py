@@ -6,7 +6,7 @@ from pprint import pprint
 import requests
 import ast
 import threading
-
+import playsound
 
 import cv2
 # to plot detected images as collage
@@ -20,10 +20,14 @@ from PIL import Image
 #  config
 image_dict = {'11': '1', '12': '2', '13': '3', '14': '4', '15': '5', '16': '6', '17': '7', '18': '8', '19': '9', "20": "A", "21":"B", "22": "C", "23": "D", "24": "E", "25":"F", "26": "G", "27": "H", "28": "S", "29": "T", "30": "U", "31": "V", "32": "W","33": "X", "34": "Y", "35": "Z", "36": "UP", "37" : "DOWN", "38": "RIGHT", "39": "LEFT", "40": "STOP"} 
 direction_dict = {0: 'U', 2: 'R', 4: 'D', 6: 'L'}
-FIXED_DIST = 30
+FIXED_DIST_1 = 30
+FIXED_DIST_2 = 33
+
 
 # Getting the images from RPI------------------------------------------------------
-model = torch.hub.load('.', 'custom', path='best_v3.pt', source='local')  
+# model = torch.hub.load('.', 'custom', path='best_yolov7.pt', source='local')  
+# model = torch.hub.load("WongKinYiu/yolov7","custom","best_yolov7.pt",trust_repo=True)
+
 print("===== Model loaded =====")
 #---------------------------------------------------------------------------------
 
@@ -338,82 +342,244 @@ try:
     print("Waiting for bluetooth to send arena...")
     # start = s.recv(buffer).decode()
     text = input("Enter to start:")
-
+    
+    second_count = 0
+    first_turn = "left"
+    second_turn = "second"
     #Start US to get distance
-    print("Starting first obstacle")
-    send_us()
-    first_dist = s.recv(buffer).decode()
-    first_dist = round(float(first_dist))
-    print("Obstacle at:", str(first_dist))
-
-    #Send to stm distance to move to first obstacle and wait for reply
-    #If too close, move back
-    new_distance = abs(first_dist - FIXED_DIST)
-    str_new_distance = str(new_distance)
-    str_new_distance = str_new_distance.zfill(3)
-    if(first_dist < FIXED_DIST):
-        message = "BW" + str(str_new_distance)
+    while True:
+        print("Starting first obstacle")
+        send_us()
+        first_dist = s.recv(buffer).decode()
+        first_dist = round(float(first_dist))
+        if first_dist < 80:
+            break
+        else:
+            send_to_stm("FW050")
+            stm_movement_reply()
+        print("Dist:",str(first_dist))
+    first_dist_abs = abs(first_dist - FIXED_DIST_1)
+    first_dist_string = str(first_dist_abs)
+    first_dist_string = first_dist_string.zfill(3)
+    if(first_dist < FIXED_DIST_1):
+        message = "BW" + str(first_dist_string)
     else:
-        message = "FW" + str(str_new_distance)
+        message = "FW" + str(first_dist_string)
     send_to_stm(message)
     stm_movement_reply()
 
-    #Snap photo
-    captured = capture(expected)
-    if(captured.get('class') == None):
-        print("No image detected")
-    elif (str(captured.get('class')) == "38"):
-        #Call stm right command
-        send_to_stm("OR001")
-        stm_movement_reply()
-
-    else:
-        #Call stm left command
-        send_to_stm("OL001")
-        stm_movement_reply()
-
-
-#------------------------------------------------------------------
-    time.sleep(5)
-    #Start US to get distance
-    print("Starting second obstacle")
-    send_us()
-    second_dist = s.recv(buffer).decode()
-    second_dist = round(float(second_dist))
-    print("Obstacle at:", str(second_dist))
-    
-    #Send to stm distance to move to first obstacle and wait for reply
-    #If too close, move back
-    #TODO :fixed the message sent
-    new_distance = abs(second_dist - FIXED_DIST)
-    str_new_distance = str(new_distance)
-    str_new_distance = str_new_distance.zfill(3)
-    if(second_dist < FIXED_DIST):
-        message = "BW" + str(str_new_distance)
-    else:
-        message = "FW" + str(str_new_distance)
-    send_to_stm(message)
+    # # Snap photo
+    # captured = capture(expected)
+    # if(captured.get('class') == None):
+    #     print("No image detected")
+    # elif (str(captured.get('class')) == "38"):
+    #     first_turn = "right"
+    #     #Call stm right command
+    #     send_to_stm("OR001")
+    #     stm_movement_reply()
+    # else:
+    #     #Call stm left command
+    #     first_turn = "left"
+    #     send_to_stm("OL001")
+    #     stm_movement_reply()
+    # text = input('next')
+    first_turn = "right"
+    send_to_stm("OR001")
     stm_movement_reply()
 
-    #Snap photo
-    captured = capture(expected)
-    if(captured.get('class') == None):
-        print("No image detected")
-    elif (str(captured.get('class')) == "38"):
-        #Call stm right command
-        send_to_stm("OR002")
-        stm_movement_reply()
+    while True:
+        print("Starting second obstacle")
+        send_us()
+        second_dist = s.recv(buffer).decode()
+        second_dist = round(float(second_dist))
+        if second_dist < 80:
+            break
+        else:
+            second_count += 1
+            send_to_stm("FW050")
+            stm_movement_reply()
+        print("Dist:",str(second_dist))
+    second_dist_detected = second_dist
+    second_dist_abs = abs(second_dist - FIXED_DIST_2)
+    second_dist_string = str(second_dist_abs)
+    second_dist_string = second_dist_string.zfill(3)
+    if(second_dist < FIXED_DIST_2):
+        message = "BW" + str(second_dist_string)
     else:
-        #Call stm left command
-        send_to_stm("OL002")
+        message = "FW" + str(second_dist_string)
+    if(second_dist_abs > 1):
+        send_to_stm(message)
         stm_movement_reply()
     
+
+    # Snap photo
+    # captured = capture(expected)
+    # if(captured.get('class') == None):
+    #     print("No image detected")
+    # elif (str(captured.get('class')) == "38"):
+    #     second_turn = "right"
+    #     #Call stm right command
+    #     send_to_stm("OR002")
+    #     stm_movement_reply()
+    # else:
+    #     #Call stm left command
+    #     second_turn = "left"
+    #     send_to_stm("OL002")
+    #     stm_movement_reply()
+    second_turn = "left"
+    send_to_stm("OL002")
+    stm_movement_reply()
+    # text = input('next')
+    # 57 first right overshot
+    #8 second right turn overshot
+    #57 first left 
+    #14 second left turn
+    total_second_dist = second_count * 50 + second_dist_detected
     #Calculate distance to 10cm infront of 1st obstacle
+    #right right
+    # final_dist = total_second_dist + 57 - 6 + 20 
+    if first_turn == "left" and second_turn == "left":
+        final_dist = total_second_dist + 57 - 14 + 20
+    elif first_turn == "left" and second_turn == "right":
+        final_dist = total_second_dist + 57 - 8 + 20
+    elif first_turn == "right" and second_turn == "right":
+        final_dist = total_second_dist + 57 - 8 + 20
+    else:
+        final_dist = total_second_dist + 57 - 14 + 20
+
+    final_dist_str = str(final_dist)
+    final_dist_str = final_dist_str.zfill(3)
+    final_dist_str = "FW" + final_dist_str
+    send_to_stm(final_dist_str)
+    stm_movement_reply()
+    # text = input('next')
+    #Final turn in 
+    if second_turn == "left":
+        send_to_stm("OR003")
+        stm_movement_reply()
+    else:
+        send_to_stm("OL003")
+        stm_movement_reply()
+
+    #Final straight line
+    send_us()
+    obs_dist = s.recv(buffer).decode()
+    obs_dist = round(float(obs_dist))
+    obs_dist = obs_dist - 20
+    print("Obstacle at:", str(obs_dist))
+    obs_dist_str = str(obs_dist)
+    obs_dist_str = obs_dist_str.zfill(3)
+    message = "FW" + obs_dist_str
+    send_to_stm(message)
+    stm_movement_reply()
+    
+#     #Send to stm distance to move to first obstacle and wait for reply
+#     #If too close, move back
+#     new_distance = abs(first_dist_avg - FIXED_DIST)
+#     str_new_distance = str(new_distance)
+#     str_new_distance = str_new_distance.zfill(3)
+#     if(first_dist_avg < FIXED_DIST):
+#         message = "BW" + str(str_new_distance)
+#     else:
+#         message = "FW" + str(str_new_distance)
+#     send_to_stm(message)
+#     stm_movement_reply()
 
 
+#     #Snap photo
+#     captured = capture(expected)
+#     if(captured.get('class') == None):
+#         print("No image detected")
+#     elif (str(captured.get('class')) == "38"):
+#         #Call stm right command
+#         send_to_stm("OR001")
+#         stm_movement_reply()
 
+#     else:
+#         #Call stm left command
+#         send_to_stm("OL001")
+#         stm_movement_reply()
 
+#     # send_to_stm("OL001")
+#     # stm_movement_reply()
+# #------------------------------------------------------------------
+#     #Start US to get distance
+#     print("Starting second obstacle")
+#     send_us()
+#     second_dist = s.recv(buffer).decode()
+#     second_dist = round(float(second_dist))
+#     print("Obstacle at:", str(second_dist))
+    
+#     #Send to stm distance to move to first obstacle and wait for reply
+#     #If too close, move back
+#     #TODO :fixed the message sent
+#     new_distance = abs(second_dist - FIXED_DIST)
+#     str_new_distance = str(new_distance)
+#     str_new_distance = str_new_distance.zfill(3)
+#     if(second_dist < FIXED_DIST):
+#         message = "BW" + str(str_new_distance)
+#     else:
+#         message = "FW" + str(str_new_distance)
+#     send_to_stm(message)
+#     stm_movement_reply()
+
+#     final_pos = "left"
+#     # Snap photo
+#     captured = capture(expected)
+#     if(captured.get('class') == None):
+#         print("No image detected")
+#     elif (str(captured.get('class')) == "38"):
+#         final_pos = "left"
+#         #Call stm right command
+#         send_to_stm("OR002")
+#         stm_movement_reply()
+#     else:
+#         #Call stm left command
+#         final_pos = "right"
+#         send_to_stm("OL002")
+#         stm_movement_reply()
+#     # send_to_stm("OL002")
+#     # stm_movement_reply()
+#     #57 first right overshot
+#     #8 second right turn overshot
+#     #57 first left 
+#     #14 second left turn
         
+#     #Calculate distance to 10cm infront of 1st obstacle
+#     #right right
+#     # final_dist = second_dist + 57 - 6 + 20 
+
+#     #left right
+#     # final_dist = second_dist + 57 - 6 + 20 
+#     #left left
+#     final_dist = second_dist + 57 - 8 + 20
+#     final_dist_str = str(final_dist)
+#     final_dist_str = final_dist_str.zfill(3)
+#     final_dist_str = "FW" + final_dist_str
+#     send_to_stm(final_dist_str)
+#     stm_movement_reply()
+
+#     #Final turn in 
+#     if final_pos == "left":
+#         send_to_stm("OL003")
+#         stm_movement_reply()
+#     else:
+#         send_to_stm("OR003")
+#         stm_movement_reply()
+    
+
+#     #Final straight line
+#     send_us()
+#     obs_dist = s.recv(buffer).decode()
+#     obs_dist = round(float(obs_dist))
+#     obs_dist = obs_dist - 20
+#     print("Obstacle at:", str(obs_dist))
+#     obs_dist_str = str(obs_dist)
+#     obs_dist_str = obs_dist_str.zfill(3)
+#     message = "FW" + obs_dist_str
+#     send_to_stm(message)
+#     stm_movement_reply()
+
 except Exception as e:
     print("*ERROR*")
     print(e)  # photo()

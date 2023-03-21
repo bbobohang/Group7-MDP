@@ -77,10 +77,10 @@ def capture():
     ret, image = cap.read()
     
     # img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    # img_gray = cv2.resize(image, (640, 640))
+    img_gray = cv2.resize(image, (640, 640))
 
     # recognition
-    results = model(image)
+    results = model(img_gray)
     results.render()
 
     """Class Dict"""
