@@ -1,0 +1,38 @@
+LOCALE = 'UTF-8'
+
+
+# android bt connection settings
+
+RFCOMM_CHANNEL = 1
+RPI_MAC_ADDR = 'todo'
+UUID = '00001101-0000-1000-8000-00805F9B34FB'
+ANDROID_SOCKET_BUFFER_SIZE = 512
+
+
+# algorithm wifi connection settings
+
+RPI_IP = '192.168.11.1'
+WIFI_PORT = 8080
+ALGORITHM_SOCKET_BUFFER_SIZE = 512
+
+
+# stm usb connection settings
+
+SERIAL_PORT = '/dev/ttyUSB0'
+BAUD_RATE = 115200
+
+
+# image recognition settings
+
+IMG_WIDTH = 640
+IMG_HEIGHT = 360
+
+# client ip settings
+
+BASE_IP = 'tcp://192.168.11.'
+PORT = 5555
+
+# add in your ip
+IMG_PROCESSING_SERVER_URL = {
+    'yn': BASE_IP + '25' + ':' + str(PORT)
+}

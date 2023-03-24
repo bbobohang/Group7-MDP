@@ -1,0 +1,135 @@
+import socket
+from src.communicator.config import LOCALE, ALGORITHM_SOCKET_BUFFER_SIZE, WIFI_PORT, RPI_IP
+
+
+# DONE
+class Algorithm:
+    def __init__(self, args, host=RPI_IP, port=WIFI_PORT):
+        print('initializing algorithm')
+
+        self.args = args
+        self.port = port
+        self.host = host
+
+        self.socket = None
+        self.address = None
+        self.client_sock = None
+
+        if not self.args.test_algo:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            print(f'algo port address is: {self.port}')
+            print(f'algo host address is: {self.host}')
+
+            self.socket.bind((self.host, self.port))
+            self.socket.listen(1)
+
+    # ok
+    def connect(self):
+        if self.args.test_algo:
+            print('algorithm connected')
+
+        else:
+            while True:
+                retry = False
+
+                try:
+                    print(
+                        f'establishing socket connection with algorithm pc: {str(self.address)}')
+
+                    if self.client_sock is None:
+                        self.client_sock, self.address = self.socket.accept()
+                        print(
+                            f'connected with algorithm pc: {str(self.address)}')
+                        retry = False
+
+                except Exception as e:
+                    print(f'connection with algorithm pc failed: {str(e)}')
+
+                    if self.client_sock is not None:
+                        self.client_sock.close()
+                        self.client_sock = None
+
+                    retry = True
+
+                if not retry:
+                    break
+
+                print('retrying algorithm pc connection')
+
+    def disconnect(self):
+        if self.args.test:
+            print('algorithm disconnected')
+
+        else:
+            try:
+                if self.client_sock is not None:
+                    self.client_sock.close()
+                    self.client_sock = None
+
+                print('disconnected with algorithm pc')
+
+            except Exception as e:
+                print(f'algorithm pc disconnection failed: {str(e)}', str(e))
+
+    def disconnect_all(self):
+        if self.args.test:
+            print('algorithm disconnected (all)')
+
+        else:
+            try:
+                if self.client_sock is not None:
+                    self.client_sock.close()
+                    self.client_sock = None
+
+                if self.socket is not None:
+                    self.socket.close()
+                    self.socket = None
+
+                print("disconnected with algorithm pc (all)")
+
+            except Exception as e:
+                print(f"algorithm pc disconnection failed: {str(e)}")
+
+    def read(self):
+        if self.args.test:
+            print('read from algorithm')
+            return 'message from algorithm'
+
+        else:
+            try:
+                msg = self.client_sock.recv(
+                    ALGORITHM_SOCKET_BUFFER_SIZE).strip()
+                # msg = msg.decode()
+
+                if len(msg) > 0:
+                    print(f'message from algorithm pc: {msg}')
+                    return msg
+
+                return None
+
+            except Exception as e:
+                print(f'algorithm read failed: {str(e)}')
+                raise e
+
+    def write(self, msg):
+        if self.args.test:
+            print('write to algorithm')
+
+        else:
+            try:
+                print(f'message to algorithm pc: {msg}')
+                msg = msg.encode()
+                self.client_sock.send(msg)
+
+            except Exception as e:
+                print(f'algorithm write failed: {str(e)}')
+                raise e
+
+
+if __name__ == '__main__':
+    msg = 'hello algo from rpi'
+    a = Algorithm()
+    a.connect()
+    a.write(msg)

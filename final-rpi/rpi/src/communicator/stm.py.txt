@@ -1,0 +1,105 @@
+from tkinter import E
+import serial
+from src.communicator.config import SERIAL_PORT, BAUD_RATE, LOCALE
+
+
+# TODO: test
+class STM:
+    def __init__(self, args):
+        print('initializing stm')
+
+        self.args = args
+        self.serial_port = SERIAL_PORT
+        self.baud_rate = BAUD_RATE
+        self.connection = None
+
+    def connect(self):
+        if self.args.test_stm:
+            print('connected with stm')
+
+        else:
+            count = 1000000
+            while True:
+                retry = False
+
+                try:
+                    if count >= 1000000:
+                        print('connecting with stm')
+
+                    self.connection = serial.Serial(
+                        self.serial_port, self.baud_rate)
+
+                    if self.connection is not None:
+                        print(
+                            f'connected with stm: {str(self.connection.name)}')
+                        retry = False
+
+                except Exception as e:
+                    if count >= 1000000:
+                        print(f'stm connection failed: {str(e)}')
+
+                    retry = True
+
+                if not retry:
+                    break
+
+                if count >= 1000000:
+                    print('retrying stm connection...')
+                    count = 0
+
+                count += 1
+
+    def disconnect(self):
+        if self.args.test_stm:
+            print('disconnected with stm')
+
+        else:
+            try:
+                if self.connection is not None:
+                    self.connection.close()
+                    self.connection = None
+
+                    print('disconnected with stm')
+
+            except Exception as e:
+                print(f'stm disconnection failed: {str(e)}')
+
+    def read(self):
+        if self.args.test_stm:
+            print('reading from stm')
+            return 'message from stm'
+
+        else:
+            try:
+                msg = self.connection.readline(20)
+                if len(msg) > 0:
+                    try:
+                        msg = msg.decode()
+                        return msg
+                    except UnicodeDecodeError:
+                        return None
+            except Exception as e:
+                print(f'read stm failed: {str(e)}')
+                raise e
+
+    def write(self, msg):
+        if self.args.test_stm:
+            print('writing to stm')
+
+        else:
+            try:
+                print(f'message to stm: {msg}')
+                msg = msg.encode()
+                self.connection.write(msg)
+
+            except Exception as e:
+                print(f'stm write error: {str(e)}')
+                raise e
+
+
+if __name__ == '__main__':
+    s = STM()
+    s.connect()
+    s.read()
+    msg = 'w'
+    s.write(msg)

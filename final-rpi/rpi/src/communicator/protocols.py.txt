@@ -1,0 +1,11 @@
+MSG_SEPARATOR = '|'.encode()
+NEWLINE = '\n'.encode()
+
+ANDROID_HEADER = 'AND'.encode()
+STM_HEADER = 'STM'.encode()
+ALGORITHM_HEADER = 'ALG'.encode()
+
+
+# TODO
+class Status:
+    IDLE = 'idle'.encode()

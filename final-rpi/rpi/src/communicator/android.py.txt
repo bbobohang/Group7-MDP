@@ -1,0 +1,147 @@
+from tkinter import E
+import bluetooth as bt
+from src.communicator.config import ANDROID_SOCKET_BUFFER_SIZE, LOCALE, RFCOMM_CHANNEL, UUID
+
+
+# TODO: test
+class Android:
+    def __init__(self, args):
+        print('initializing android')
+
+        self.args = args
+        self.server_sock = None
+        self.client_sock = None
+
+        if not self.args.test_android:
+            self.server_sock = bt.BluetoothSocket(bt.RFCOMM)
+            # can also use bt.PORT_ANY
+            self.server_sock.bind(("", bt.PORT_ANY))
+            self.server_sock.listen(RFCOMM_CHANNEL)
+
+            bt.advertise_service(
+                self.server_sock,
+                'MDP-TEAM11',
+                service_id=UUID,
+                service_classes=[UUID, bt.SERIAL_PORT_CLASS],
+                profiles=[bt.SERIAL_PORT_PROFILE]
+            )
+
+        print('bt advertise service passed')
+        print('bt socket: %s', str(self.server_sock))
+
+    # ok
+    def connect(self):
+        if self.args.test_android:
+            print('connected to android')
+
+        else:
+            while True:
+                retry = False
+
+                try:
+                    print(
+                        'establishing bt connection with android N7 tablet')
+
+                    if self.client_sock is None:
+                        print('client socket is None')
+                        self.client_sock, self.addr = self.server_sock.accept()
+                        retry = False
+                        print(
+                            'connected with android at address: %s', str(self.addr))
+
+                except Exception:
+                    print('bt connection with android failed')
+
+                    if self.client_sock is not None:
+                        self.client_sock.close()
+                        self.client_sock = None
+
+                    retry = True
+
+                if not retry:
+                    break
+
+                print('retrying bt connection with android N7 tablet')
+
+    def disconnect(self):
+        if self.args.test_android:
+            print('disconnected with android')
+
+        else:
+            try:
+                if self.client_sock is not None:
+                    self.client_sock.close()
+                    self.client_sock = None
+
+                print('disconnected with android N7 tablet')
+
+            except Exception as e:
+                print('android disconnection failed: %s', str(e))
+
+    def disconnect_all(self):
+        if self.args.test_android:
+            print('disconnected with android (all)')
+
+        else:
+            try:
+                if self.client_sock is not None:
+                    self.client_sock.close()
+                    self.client_Sock = None
+
+                if self.server_sock is not None:
+                    self.server_sock.close()
+                    self.server_sock = None
+
+                print('disconnected (all) with android N7 tablet')
+            except Exception as e:
+                print('android disconnection (all) failed: %s', str(e))
+
+    def read(self):
+        if self.args.test_android:
+            print('reading from android')
+            return 'message from android'
+
+        else:
+            try:
+                msg = self.client_sock.recv(ANDROID_SOCKET_BUFFER_SIZE).strip()
+                msg = msg.decode()
+
+                print('message from android: %s', msg)
+
+                if msg is None:
+                    return None
+
+                if len(msg) > 0:
+                    return msg
+
+                return None
+
+            except Exception as e:
+                print('android read failed: %s', str(e))
+                raise e
+
+    def write(self, msg):
+        if self.args.test_android:
+            print('writing to android')
+
+        else:
+            try:
+                print('message to android: %s', msg)
+
+                msg = msg.encode()
+                self.client_sock.send(msg)
+
+            except Exception as e:
+                print('android write failed: %s', e)
+                raise e
+
+
+# testing
+if __name__ == '__main__':
+    print('android test')
+    a = Android()
+    a.connect()
+    a.read()
+    msg = 'hello android from rpi'
+    a.write(msg)
+    print('android connection test passed')

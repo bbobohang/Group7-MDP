@@ -1,0 +1,426 @@
+from typing import Deque
+from src.communicator.android import Android
+from src.communicator.algorithm import Algorithm
+from src.communicator.stm import STM
+from src.communicator.protocols import *
+from src.communicator.config import *
+
+import time
+from PIL import Image
+import numpy as np
+import imagezmq
+from picamera import PiCamera
+from picamera.array import PiRGBArray
+
+import collections
+from multiprocessing import Process, Value
+from multiprocessing.managers import BaseManager
+
+# from signal import signal, SIGPIPE, SIG_DFL
+# signal(SIGPIPE, SIG_DFL)
+
+
+img_count = 0
+
+
+class DequeProxy(object):
+    def __init__(self, *args):
+        self.deque = collections.deque(*args)
+
+    def __len__(self):
+        return self.deque.__len__()
+
+    def append(self, x):
+        self.deque.append(x)
+
+    def appendleft(self, x):
+        self.deque.appendleft(x)
+
+    def popleft(self):
+        return self.deque.popleft()
+
+    def empty(self):
+        if self.deque:
+            return False
+        else:
+            return True
+
+
+class DequeManager(BaseManager):
+    pass
+
+
+DequeManager.register('DequeProxy', DequeProxy,
+                      exposed=['__len__', 'append', 'appendleft', 'popleft', 'empty'])
+
+
+class MultiProcessCommunicator:
+    def __init__(self, args):
+        self.args = args
+
+        print('start multiprocessing communication')
+
+        self.algorithm = Algorithm(self.args)
+        self.stm = STM(self.args)
+        self.android = Android(self.args)
+
+        self.manager = DequeManager()
+        self.manager.start()
+
+        # stores incoming messages
+        self.message_deque = self.manager.DequeProxy()
+        self.android_message_deque = self.manager.DequeProxy()
+
+        # initialize processes
+        if args.test_algo:
+            self.read_algorithm_process = Process(
+                target=self._read_dummy_algorithm)
+        else:
+            self.read_algorithm_process = Process(target=self._read_algorithm)
+
+        if args.test_stm:
+            self.read_stm_process = Process(target=self._read_dummy_stm)
+        else:
+            self.read_stm_process = Process(target=self._read_stm)
+
+        if args.test_android:
+            self.read_android_process = Process(
+                target=self._read_dummy_android)
+        else:
+            self.read_android_process = Process(target=self._read_android)
+
+        if args.test_write:
+            self.write_process = Process(target=self._write_dummy_target)
+        else:
+            self.write_process = Process(target=self._write_target)
+
+        if args.test_write_android:
+            self.write_android_process = Process(
+                target=self._write_dummy_android)
+        else:
+            self.write_android_process = Process(target=self._write_android)
+
+        # current status of robot
+        self.status = Status.IDLE
+
+        # 0 - stm, 1 - algorithm
+        self.dropped_connection = Value('i', 0)
+
+        self.image_process = None
+        self.image_deque = None
+
+        if self.args.enable_img:
+            print('start exploration with image recognition')
+            self.image_process = Process(target=self._process_pic)
+            self.image_deque = self.manager.DequeProxy()
+
+            self.image_processing_server_url = IMG_PROCESSING_SERVER_URL[self.args.name]
+            print(
+                f'image processing server url: {self.image_processing_server_url}')
+            self.image_count = Value('i', 0)
+            print(f'self.image_deque: {self.image_deque}')
+
+    def start(self):
+        try:
+            # connect to devices
+            self.algorithm.connect()
+            self.stm.connect()
+            self.android.connect()
+
+            print('connected to algorithm, stm, and android')
+
+            # start processes
+            self.read_algorithm_process.start()
+            self.read_stm_process.start()
+            self.read_android_process.start()
+            self.write_process.start()
+            self.write_android_process.start()
+
+            if self.args.enable_img:
+                self.image_process.start()
+                print(
+                    'all processes started: read stm, read algorithm, read android, write, write android, image processing')
+            else:
+                print(
+                    'all processes started: read stm, read algorithm, read android, write, write android')
+        except Exception as e:
+            raise e
+
+    def end(self):
+        self.algorithm.disconnect_all()
+        self.android.disconnect_all()
+        print('multiprocess communication ended')
+
+    def _allow_reconnection(self):
+        print('RPi reconnection enabled')
+
+        while True:
+            try:
+                if not self.read_algorithm_process.is_alive():
+                    self._reconnect_algorithm()
+
+                if not self.read_stm_process.is_alive():
+                    self._reconnect_stm()
+
+                if not self.read_android_process.is_alive():
+                    self._reconnect_android()
+
+                if not self.write_process.is_alive():
+                    if self.dropped_connection.value == 0:
+                        self._reconnect_arduino()
+                    elif self.dropped_connection.value == 1:
+                        self._reconnect_algorithm()
+
+                if not self.write_android_process.is_alive():
+                    self._reconnect_android()
+
+                if self.image_process is not None and not self.image_process.is_alive():
+                    self.image_process.terminate()
+
+            except Exception as e:
+                print(f'error during reconnection: {str(e)}')
+                raise e
+
+    def _reconnect_algorithm(self):
+        self.algorithm.disconnect()
+
+        self.read_algorithm_process.terminate()
+        self.write_process.terminate()
+        self.write_android_process.terminate()
+
+        self.algorithm.connect()
+
+        self.read_algorithm_process = Process(target=self._read_algorithm)
+        self.read_algorithm_process.start()
+
+        self.write_process = Process(target=self._write_target)
+        self.write_process.start()
+
+        self.write_android_process = Process(target=self._write_android)
+        self.write_android_process.start()
+
+        print('reconnected to algorithm')
+
+    def _reconnect_stm(self):
+        self.stm.disconnect()
+
+        self.read_stm_process.terminate()
+        self.write_process.terminate()
+        self.write_android_process.terminate()
+
+        self.stm.connect()
+
+        self.read_stm_process = Process(target=self._read_stm)
+        self.read_stm_process.start()
+
+        self.write_process = Process(target=self._write_target)
+        self.write_process.start()
+
+        self.write_android_process = Process(target=self._write_android)
+        self.write_android_process.start()
+
+        print('reconnected to stm')
+
+    def _reconnect_android(self):
+        self.android.disconnect()
+
+        self.read_android_process.terminate()
+        self.write_process.terminate()
+        self.write_android_process.terminate()
+
+        self.android.connect()
+
+        self.read_android_process = Process(target=self._read_android)
+        self.read_android_process.start()
+
+        self.write_process = Process(target=self._write_target)
+        self.write_process.start()
+
+        self.write_android_process = Process(target=self._write_android)
+        self.write_android_process.start()
+
+        print('Successfully reconnected to android')
+
+    # TODO: test
+    def _read_stm(self):
+        while True:
+            try:
+                messages = self.stm.read()
+
+                if messages is None:
+                    continue
+
+                message_list = messages.splitlines()
+
+                for message in message_list:
+                    if len(message) <= 0:
+                        continue
+
+                    self.message_deque.append(self._format_for(
+                        ALGORITHM_HEADER,
+                        message + NEWLINE
+                    ))
+
+            except Exception as e:
+                print(f'read stm failed: {str(e)}')
+                break
+
+    def _read_algorithm(self):
+        while True:
+            try:
+                messages = self.algorithm.read()
+
+                if messages is None:
+                    continue
+
+                message_list = messages.splitlines()
+
+                for message in message_list:
+                    if len(message) <= 0:
+                        continue
+
+                    # TODO: test code, broken pipe error
+                    print(f'testing algo read algorithm: {message}')
+                    formatted_msg = self._format_for(
+                        ALGORITHM_HEADER,
+                        message
+                    )
+
+                    print('message queue length:', len(self.message_deque))
+                    print(f'formatted algo message: {str(formatted_msg)}')
+
+                    self.message_deque.append(formatted_msg)
+
+                    print('message queue length 2:', len(self.message_deque))
+
+            except Exception as e:
+                print(f'read algorithm failed: {str(e)}')
+
+    def _forward_message_algorithm_to_android(self, message):
+        pass
+
+    def _read_android(self):
+        while True:
+            try:
+                messages = self.android.read()
+
+                if messages is None:
+                    continue
+
+                message_list = messages.splitlines()
+
+                for message in message_list:
+                    if len(message) <= 0:
+                        continue
+
+                    # TODO: route different types of messages to different places
+                    pass
+
+            except Exception as e:
+                print(f'read android failed: {str(e)}')
+                break
+
+    def _write_target(self):
+        while True:
+            target = None
+            try:
+                if len(self.message_deque) > 0:
+                    message = self.message_deque.popleft()
+                    target, payload = message['target'], message['payload']
+
+                    if target == STM_HEADER:
+                        self.stm.write(payload)
+
+                    elif target == ALGORITHM_HEADER:
+                        self.algorithm.write(payload)
+
+                    else:
+                        print(f'invalid header: {target}')
+
+            except Exception as e:
+                print(f'write target failed: {str(e)}')
+
+                if target == STM_HEADER:
+                    self.dropped_connection.value = 0
+
+                elif target == ALGORITHM_HEADER:
+                    self.dropped_connection.value = 1
+
+                self.message_deque.appendleft(message)
+                break
+
+    def _write_android(self):
+        while True:
+            try:
+                if len(self.android_message_deque) > 0:
+                    message = self.android_message_deque.popleft()
+
+                    self.android.write(message)
+
+            except Exception as e:
+                print(f'write android failed: {str(e)}')
+                self.android_message_deque.appendleft(message)
+                break
+
+    def _take_pic(self):
+        global img_count
+        try:
+            camera = PiCamera(resolution=(640, 360))
+            camera.awb_mode = 'horizon'
+
+            time.sleep(3)
+            raw_capture = PiRGBArray(camera)
+
+            camera.capture(raw_capture, format='bgr')
+            image = raw_capture.array
+            pil_img = np.asarray(image)
+            pil_img = Image.fromarray(pil_img[:, :, ::-1])
+            pil_img.save('./frame_{}.jpg'.format(img_count))
+            img_count += 1
+
+            camera.close()
+
+        except Exception as e:
+            print(f'picture taking failed: {str(e)}')
+
+    def _process_pic(self):
+        pass
+
+    def _format_for(self, target, payload):
+        return {
+            "target": target,
+            "payload": payload,
+        }
+
+    # dummy functions for testing
+    def _read_dummy_stm(self):
+        while True:
+            print('read dummy stm')
+            time.sleep(3)
+
+    # part with broken pipe error
+    def _read_dummy_algorithm(self):
+        while True:
+            print('read dummy algorithm')
+
+            self.message_deque.append(self._format_for(
+                ALGORITHM_HEADER,
+                'hello'.encode() + NEWLINE
+            ))
+
+            time.sleep(3)
+
+    def _read_dummy_android(self):
+        while True:
+            print('read dummy android')
+            time.sleep(3)
+
+    def _write_dummy_target(self):
+        while True:
+            print('write dummy target')
+            time.sleep(3)
+
+    def _write_dummy_android(self):
+        while True:
+            print('write dummy android')
+            time.sleep(3)
